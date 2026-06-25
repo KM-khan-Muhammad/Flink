@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Flink.Application/Flink.Application.csproj" Id="4bf16421-f26e-42ef-b65f-ef8cc18c065c" />
+  <Project Path="Flink.Domain/Flink.Domain.csproj" Id="b0c90d3c-ac36-4e14-bdc1-31a5633558c7" />
+  <Project Path="Flink.Infrastructure/Flink.Infrastructure.csproj" Id="2aa309e2-9006-41c5-8221-acc8e91c6d1c" />
+  <Project Path="Flink.Persistence/Flink.Persistence.csproj" Id="b26c547c-8681-4fed-968f-1f0946a3e993" />
+  <Project Path="Flink.Tests/Flink.Tests.csproj" />
+  <Project Path="Flink.web/Flink.web.csproj" Id="995dfb25-1007-4150-8637-f4c3ea281cff" />
+</Solution>

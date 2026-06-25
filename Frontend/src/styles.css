@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══ THEME VARIABLES ═══ */
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-elevated: #121212;
+  --bg-hover: #1a1a1a;
+  --bg-input: #121212;
+  --bg-bubble-sent: #7c5cbf;
+  --bg-bubble-received: #3a3a3a;
+  --bg-avatar: #262626;
+  --border-color: #363636;
+  --border-focus: #a8a8a8;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a8a8a8;
+  --text-muted: #737373;
+  --text-inverse: #000000;
+  --accent: #7c5cbf;
+  --accent-hover: #6a4aad;
+  --danger: #ed4956;
+  --success: #58c322;
+}
+
+.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f2f2f2;
+  --bg-input: #fafafa;
+  --bg-bubble-sent: #7c5cbf;
+  --bg-bubble-received: #e0e0e0;
+  --bg-avatar: #dbdbdb;
+  --border-color: #dbdbdb;
+  --border-focus: #a8a8a8;
+  --text-primary: #262626;
+  --text-secondary: #737373;
+  --text-muted: #a8a8a8;
+  --text-inverse: #ffffff;
+  --accent: #7c5cbf;
+  --accent-hover: #6a4aad;
+  --danger: #ed4956;
+  --success: #58c322;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Animations */
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Date input dark mode fix */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Theme-aware utility classes */
+.theme-bg { background-color: var(--bg-primary); }
+.theme-bg-secondary { background-color: var(--bg-secondary); }
+.theme-bg-elevated { background-color: var(--bg-elevated); }
+.theme-bg-hover:hover { background-color: var(--bg-hover); }
+.theme-bg-input { background-color: var(--bg-input); }
+.theme-bg-avatar { background-color: var(--bg-avatar); }
+.theme-border { border-color: var(--border-color); }
+.theme-text { color: var(--text-primary); }
+.theme-text-secondary { color: var(--text-secondary); }
+.theme-text-muted { color: var(--text-muted); }

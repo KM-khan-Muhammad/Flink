@@ -1,0 +1,106 @@
+.context-menu {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.context-menu-item:active {
+  opacity: 0.7;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Chat Bubble Styles */
+.bubble-left {
+  background: var(--bg-bubble-received);
+  border-radius: 18px 18px 18px 4px;
+  position: relative;
+  color: var(--text-primary);
+}
+
+.bubble-left::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-bubble-received);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+.bubble-right {
+  background: var(--bg-bubble-sent);
+  border-radius: 18px 18px 4px 18px;
+  position: relative;
+  color: #fff;
+}
+
+.bubble-right::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-bubble-sent);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+.bubble-left-reply {
+  background: var(--bg-bubble-received);
+  border-radius: 4px 18px 18px 4px;
+  position: relative;
+  color: var(--text-primary);
+}
+
+.bubble-left-reply::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-bubble-received);
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+.bubble-right-reply {
+  background: var(--bg-bubble-sent);
+  border-radius: 18px 4px 4px 18px;
+  position: relative;
+  color: #fff;
+}
+
+.bubble-right-reply::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--bg-bubble-sent);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
