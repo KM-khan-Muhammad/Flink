@@ -17,249 +17,176 @@ interface AuthResponse {
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     @if (showToast) {
-      <div class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#262626] theme-text px-6 py-3 rounded-lg shadow-2xl z-50 flex items-center gap-3" style="animation: msgIn 0.3s ease;">
-        <i class="fa-solid fa-circle-check text-green-500 text-[1.1rem]"></i>
-        <span class="text-[14px] font-semibold">Registration successful! Redirecting...</span>
+      <div class="auth-toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Registration successful! Redirecting...</span>
       </div>
     }
 
-    <div class="min-h-screen flex flex-col items-center justify-center theme-bg theme-text p-4" style="font-family: 'Inter', sans-serif;">
-      <div class="w-full max-w-[350px] flex flex-col gap-2.5">
+    <div class="auth-page">
+      <section class="auth-shell auth-shell-register">
+        <aside class="auth-visual">
+          <div class="auth-dot-grid"></div>
+          <div class="auth-avatar avatar-one"><span>KM</span></div>
+          <div class="auth-avatar avatar-two"><span>SA</span></div>
+          <div class="auth-avatar avatar-three"><span>AR</span></div>
+          <div class="auth-avatar avatar-four"><span>MH</span></div>
+          <div class="auth-mini-icon icon-video"><i class="fa-solid fa-video"></i></div>
+          <div class="auth-mini-icon icon-mic"><i class="fa-solid fa-microphone"></i></div>
+          <div class="auth-mini-icon icon-call"><i class="fa-solid fa-phone"></i></div>
+          <div class="auth-mini-icon icon-more"><i class="fa-solid fa-ellipsis"></i></div>
+          <div class="auth-chat-mark">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="auth-brand">
+            <h1>Flink</h1>
+            <strong>Connect. Chat. Share.</strong>
+            <p>Stay in touch with friends and family anytime, anywhere.</p>
+            <div class="auth-dots"><span></span><span></span><span></span></div>
+          </div>
+        </aside>
 
-        <!-- Main Card -->
-        <div class="w-full border theme-border theme-bg px-10 pt-10 pb-6 flex flex-col items-center">
+        <main class="auth-form-panel">
+          <div class="auth-form-header">
+            <h2>Create your account</h2>
+            <p>Sign up to see photos and videos from your friends.</p>
+          </div>
 
-          <!-- Logo -->
-          <h1 class="text-[3rem] theme-text mb-2" style="font-family: 'Grand Hotel', cursive; font-weight: 400;">Flink</h1>
-          <p class="theme-text-secondary text-[17px] font-semibold text-center leading-tight mb-4">Sign up to see photos and videos from your friends.</p>
-
-          <!-- Stepper -->
-          <div class="flex items-center gap-[6px] mb-5 w-full">
-            <div class="h-[3px] flex-1 rounded-full transition-all duration-300" [ngClass]="currentStep >= 1 ? 'bg-[#0095f6]' : 'theme-border'"></div>
-            <div class="h-[3px] flex-1 rounded-full transition-all duration-300" [ngClass]="currentStep >= 2 ? 'bg-[#0095f6]' : 'theme-border'"></div>
-            <div class="h-[3px] flex-1 rounded-full transition-all duration-300" [ngClass]="currentStep >= 3 ? 'bg-[#0095f6]' : 'theme-border'"></div>
+          <div class="auth-stepper">
+            <div class="auth-step" [class.active]="currentStep >= 1">
+              <span>1</span>
+              <small>Profile</small>
+            </div>
+            <div class="auth-step-line" [class.active]="currentStep >= 2"></div>
+            <div class="auth-step" [class.active]="currentStep >= 2">
+              <span>2</span>
+              <small>Verify</small>
+            </div>
+            <div class="auth-step-line" [class.active]="currentStep >= 3"></div>
+            <div class="auth-step" [class.active]="currentStep >= 3">
+              <span>3</span>
+              <small>Complete</small>
+            </div>
           </div>
 
           @if (successMessage) {
-            <p class="text-[#58c322] text-[13px] text-center mb-3 font-medium">{{ successMessage }}</p>
+            <p class="auth-message success">{{ successMessage }}</p>
           }
           @if (errorMessage) {
-            <p class="text-[#ed4956] text-[13px] text-center mb-3 font-medium leading-tight">{{ errorMessage }}</p>
+            <p class="auth-message error">{{ errorMessage }}</p>
           }
 
-          <form (ngSubmit)="currentStep === 3 ? onSubmit() : nextStep()" class="w-full flex flex-col gap-[6px]">
-
-            <!-- Step 1: Basic Info -->
+          <form (ngSubmit)="currentStep === 3 ? onSubmit() : nextStep()" class="auth-form">
             @if (currentStep === 1) {
-              <div class="flex flex-col gap-[6px] w-full" style="animation: msgIn 0.3s ease;">
-                <div class="relative w-full">
-                  <input type="text" name="firstName" id="reg-fn"
-                    class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                    [(ngModel)]="user.firstName" required placeholder=" ">
-                  <label for="reg-fn"
-                    class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                      peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                      peer-focus:text-[10px] peer-focus:top-[6px]
-                      peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                      text-[10px] top-[6px]">
-                    First Name
-                  </label>
+              <div class="auth-step-body">
+                <div class="auth-field">
+                  <i class="fa-regular fa-user"></i>
+                  <input type="text" name="firstName" id="reg-fn" [(ngModel)]="user.firstName" required placeholder="First Name">
                 </div>
-                <div class="relative w-full">
-                  <input type="text" name="lastName" id="reg-ln"
-                    class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                    [(ngModel)]="user.lastName" required placeholder=" ">
-                  <label for="reg-ln"
-                    class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                      peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                      peer-focus:text-[10px] peer-focus:top-[6px]
-                      peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                      text-[10px] top-[6px]">
-                    Last Name
-                  </label>
+                <div class="auth-field">
+                  <i class="fa-regular fa-user"></i>
+                  <input type="text" name="lastName" id="reg-ln" [(ngModel)]="user.lastName" required placeholder="Last Name">
                 </div>
-                <div class="relative w-full">
-                  <span class="absolute left-[9px] top-[5px] text-[10px] theme-text-secondary pointer-events-none">Date of Birth</span>
-                  <input type="date" name="dateOfBirth"
-                    class="w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                    [(ngModel)]="user.dateOfBirth" required>
+                <div class="auth-field">
+                  <i class="fa-regular fa-calendar"></i>
+                  <input type="date" name="dateOfBirth" [(ngModel)]="user.dateOfBirth" required>
                 </div>
-                <button type="submit"
-                  class="w-full bg-[#0095f6] text-white font-semibold text-[14px] h-[32px] rounded-lg mt-2 transition-colors hover:bg-[#1877f2] disabled:bg-[#0095f6]/30 disabled:cursor-default flex items-center justify-center"
-                  [disabled]="!user.firstName || !user.lastName || !user.dateOfBirth">
-                  Next
+                <button type="submit" class="auth-primary" [disabled]="!user.firstName || !user.lastName || !user.dateOfBirth">
+                  <span>Next</span>
+                  <i class="fa-solid fa-arrow-right"></i>
                 </button>
               </div>
             }
 
-            <!-- Step 2: Email & Password -->
             @if (currentStep === 2) {
-              <div class="flex flex-col gap-[6px] w-full" style="animation: msgIn 0.3s ease;">
-                <div class="flex gap-[6px]">
-                  <div class="relative flex-1">
-                    <input type="email" name="email" id="reg-email"
-                      class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                      [(ngModel)]="user.email" (input)="onEmailChange()" required placeholder=" " [disabled]="emailOtpVerified">
-                    <label for="reg-email"
-                      class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                        peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                        peer-focus:text-[10px] peer-focus:top-[6px]
-                        peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                        text-[10px] top-[6px]">
-                      Email address
-                    </label>
+              <div class="auth-step-body">
+                <div class="auth-inline">
+                  <div class="auth-field">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" name="email" id="reg-email" [(ngModel)]="user.email" (input)="onEmailChange()" required placeholder="Email address" [disabled]="emailOtpVerified">
                   </div>
-                  <button type="button"
-                    class="h-[38px] px-3 bg-transparent border theme-border rounded-[3px] text-[#0095f6] font-semibold text-[13px] transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-default whitespace-nowrap"
-                    (click)="sendEmailOtp()" [disabled]="!user.email || emailOtpVerified || loading">
+                  <button type="button" class="auth-secondary compact" (click)="sendEmailOtp()" [disabled]="!user.email || emailOtpVerified || loading">
                     {{ emailOtpSent ? 'Resend' : 'Send OTP' }}
                   </button>
                 </div>
 
                 @if (emailOtpSent && !emailOtpVerified) {
-                  <div class="flex gap-[6px]">
-                    <div class="relative flex-1">
-                      <input type="text" name="emailOtp" id="reg-email-otp"
-                        class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                        [(ngModel)]="emailOtp" placeholder=" ">
-                      <label for="reg-email-otp"
-                        class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                          peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                          peer-focus:text-[10px] peer-focus:top-[6px]
-                          peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                          text-[10px] top-[6px]">
-                        Confirmation code
-                      </label>
+                  <div class="auth-inline">
+                    <div class="auth-field">
+                      <i class="fa-solid fa-key"></i>
+                      <input type="text" name="emailOtp" id="reg-email-otp" [(ngModel)]="emailOtp" placeholder="Confirmation code">
                     </div>
-                    <button type="button"
-                      class="h-[38px] px-3 bg-[#0095f6] rounded-[3px] theme-text font-semibold text-[13px] transition-colors hover:bg-[#1877f2] disabled:opacity-40"
-                      (click)="verifyEmailOtp()" [disabled]="!emailOtp || loading">
+                    <button type="button" class="auth-secondary compact filled" (click)="verifyEmailOtp()" [disabled]="!emailOtp || loading">
                       Verify
                     </button>
                   </div>
                 }
 
-                <div class="relative w-full">
-                  <input type="password" name="password" id="reg-pwd"
-                    class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                    [(ngModel)]="user.password" required placeholder=" ">
-                  <label for="reg-pwd"
-                    class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                      peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                      peer-focus:text-[10px] peer-focus:top-[6px]
-                      peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                      text-[10px] top-[6px]">
-                    Password
-                  </label>
+                <div class="auth-field">
+                  <i class="fa-solid fa-lock"></i>
+                  <input type="password" name="password" id="reg-pwd" [(ngModel)]="user.password" required placeholder="Password">
                 </div>
 
-                <div class="flex gap-[6px] mt-2">
-                  <button type="button"
-                    class="flex-1 h-[32px] border theme-border theme-text font-semibold text-[14px] rounded-lg transition-colors hover:theme-bg-elevated"
-                    (click)="prevStep()">Back</button>
-                  <button type="submit"
-                    class="flex-[2] h-[32px] bg-[#0095f6] text-white font-semibold text-[14px] rounded-lg transition-colors hover:bg-[#1877f2] disabled:bg-[#0095f6]/30 disabled:cursor-default"
-                    [disabled]="!user.email || !user.password || !emailOtpVerified">
-                    Next
+                <div class="auth-actions">
+                  <button type="button" class="auth-secondary" (click)="prevStep()">Back</button>
+                  <button type="submit" class="auth-primary" [disabled]="!user.email || !user.password || !emailOtpVerified">
+                    <span>Next</span>
+                    <i class="fa-solid fa-arrow-right"></i>
                   </button>
                 </div>
               </div>
             }
 
-            <!-- Step 3: WhatsApp & Final Submit -->
             @if (currentStep === 3) {
-              <div class="flex flex-col gap-[6px] w-full" style="animation: msgIn 0.3s ease;">
-                <div class="flex gap-[6px]">
-                  <div class="relative flex-1">
-                    <input type="tel" name="whatsappNumber" id="reg-wa"
-                      class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                      [(ngModel)]="user.whatsappNumber" (input)="onWhatsappChange()" placeholder=" " [disabled]="whatsappOtpVerified">
-                    <label for="reg-wa"
-                      class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                        peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                        peer-focus:text-[10px] peer-focus:top-[6px]
-                        peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                        text-[10px] top-[6px]">
-                      WhatsApp number (optional)
-                    </label>
+              <div class="auth-step-body">
+                <div class="auth-inline">
+                  <div class="auth-field">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <input type="tel" name="whatsappNumber" id="reg-wa" [(ngModel)]="user.whatsappNumber" (input)="onWhatsappChange()" placeholder="WhatsApp number (optional)" [disabled]="whatsappOtpVerified">
                   </div>
-                  <button type="button"
-                    class="h-[38px] px-3 bg-transparent border theme-border rounded-[3px] text-[#0095f6] font-semibold text-[13px] transition-colors hover:opacity-80 disabled:opacity-40 disabled:cursor-default whitespace-nowrap"
-                    (click)="sendWhatsappOtp()" [disabled]="!user.whatsappNumber || whatsappOtpVerified || loading">
+                  <button type="button" class="auth-secondary compact" (click)="sendWhatsappOtp()" [disabled]="!user.whatsappNumber || whatsappOtpVerified || loading">
                     {{ whatsappOtpSent ? 'Resend' : 'Send OTP' }}
                   </button>
                 </div>
 
                 @if (whatsappOtpSent && !whatsappOtpVerified) {
-                  <div class="flex gap-[6px]">
-                    <div class="relative flex-1">
-                      <input type="text" name="whatsappOtp" id="reg-wa-otp"
-                        class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                        [(ngModel)]="whatsappOtp" placeholder=" ">
-                      <label for="reg-wa-otp"
-                        class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                          peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                          peer-focus:text-[10px] peer-focus:top-[6px]
-                          peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                          text-[10px] top-[6px]">
-                        Confirmation code
-                      </label>
+                  <div class="auth-inline">
+                    <div class="auth-field">
+                      <i class="fa-solid fa-key"></i>
+                      <input type="text" name="whatsappOtp" id="reg-wa-otp" [(ngModel)]="whatsappOtp" placeholder="Confirmation code">
                     </div>
-                    <button type="button"
-                      class="h-[38px] px-3 bg-[#0095f6] rounded-[3px] theme-text font-semibold text-[13px] transition-colors hover:bg-[#1877f2] disabled:opacity-40"
-                      (click)="verifyWhatsappOtp()" [disabled]="!whatsappOtp || loading">
+                    <button type="button" class="auth-secondary compact filled" (click)="verifyWhatsappOtp()" [disabled]="!whatsappOtp || loading">
                       Verify
                     </button>
                   </div>
                 }
 
-                <p class="theme-text-secondary text-[12px] text-center mt-3 leading-relaxed">
-                  By signing up, you agree to our <span class="text-[#e0f1ff]">Terms</span>, <span class="text-[#e0f1ff]">Privacy Policy</span> and <span class="text-[#e0f1ff]">Cookies Policy</span>.
+                <p class="auth-terms">
+                  By signing up, you agree to our <span>Terms</span>, <span>Privacy Policy</span> and <span>Cookies Policy</span>.
                 </p>
 
-                <button type="submit"
-                  class="w-full bg-[#0095f6] text-white font-semibold text-[14px] h-[32px] rounded-lg mt-2 transition-colors hover:bg-[#1877f2] disabled:bg-[#0095f6]/30 disabled:cursor-default flex items-center justify-center"
-                  [disabled]="loading || !whatsappOtpVerified">
+                <button type="submit" class="auth-primary" [disabled]="loading || (!!user.whatsappNumber && !whatsappOtpVerified)">
                   @if (loading) {
-                    <div class="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div class="auth-spinner"></div>
                   } @else {
-                    Sign up
+                    <span>Sign up</span>
+                    <i class="fa-solid fa-arrow-right"></i>
                   }
                 </button>
-                <div class="flex gap-[6px] mt-1">
-                  <button type="button"
-                    class="flex-1 h-[32px] border theme-border theme-text font-semibold text-[14px] rounded-lg transition-colors hover:theme-bg-elevated"
-                    (click)="prevStep()">Back</button>
-                  <button type="button"
-                    class="flex-1 h-[32px] theme-text-secondary font-semibold text-[14px] rounded-lg transition-colors hover:opacity-80"
-                    (click)="skipStep3()">Skip</button>
+                <div class="auth-actions">
+                  <button type="button" class="auth-secondary" (click)="prevStep()">Back</button>
+                  <button type="button" class="auth-link-button" (click)="skipStep3()">Skip</button>
                 </div>
               </div>
             }
           </form>
-        </div>
 
-        <!-- Log in Card -->
-        <div class="w-full border theme-border theme-bg py-[25px] flex justify-center items-center gap-[5px] text-[14px]">
-          <span class="theme-text">Have an account?</span>
-          <a routerLink="/login" class="text-[#0095f6] font-semibold hover:opacity-80 transition-colors cursor-pointer">Log in</a>
-        </div>
-
-        <!-- Get the app -->
-        <div class="w-full flex flex-col items-center mt-2 gap-4">
-          <span class="text-[14px] theme-text">Get the app.</span>
-          <div class="flex gap-2 justify-center">
-            <div class="h-[40px] px-4 theme-bg border theme-border rounded-[5px] flex items-center justify-center cursor-pointer hover:theme-bg-elevated transition-colors gap-2">
-              <i class="fa-brands fa-apple text-[1.2rem] theme-text"></i>
-              <span class="text-[13px] font-medium theme-text">App Store</span>
-            </div>
-            <div class="h-[40px] px-4 theme-bg border theme-border rounded-[5px] flex items-center justify-center cursor-pointer hover:theme-bg-elevated transition-colors gap-2">
-              <i class="fa-brands fa-google-play text-[1.1rem] theme-text"></i>
-              <span class="text-[13px] font-medium theme-text">Google Play</span>
-            </div>
+          <div class="auth-footer">
+            <span>Have an account?</span>
+            <a routerLink="/login">Log in</a>
           </div>
-        </div>
-      </div>
+        </main>
+      </section>
     </div>
   `
 })
@@ -370,7 +297,7 @@ export class RegisterComponent {
         this.loading = false;
         if (response.success) {
           this.whatsappOtpSent = true;
-          alert('OTP sent to WhatsApp! (Check backend console)');
+          alert(response.message || 'OTP sent.');
         } else {
           this.errorMessage = response.message;
         }

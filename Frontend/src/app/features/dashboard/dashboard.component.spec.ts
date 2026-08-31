@@ -1,18 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of, EMPTY } from 'rxjs';
+import { of, EMPTY, Subject } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { ChatService } from '../../core/chat/chat.service';
+import { SignalRService } from '../../core/signalr/signalr.service';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
   let fixture: ComponentFixture<DashboardComponent>;
   let routerSpy: jasmine.Spy;
   let chatServiceSpy: jasmine.SpyObj<ChatService>;
+  let signalRServiceSpy: jasmine.SpyObj<SignalRService>;
 
   beforeEach(async () => {
     routerSpy = jasmine.createSpy('navigate');
-    chatServiceSpy = jasmine.createSpyObj('ChatService', ['getChats', 'getMessages', 'sendMessage', 'markAsRead', 'searchUsers', 'startChat', 'getAllUsers']);
+    chatServiceSpy = jasmine.createSpyObj('ChatService', ['getChats', 'getMessages', 'sendMessage', 'markAsRead', 'searchUsers', 'startChat', 'getAllUsers', 'sendHeartbeat', 'sendTyping', 'getTypingStatus', 'updateProfile', 'getUserInfo', 'initiateCall', 'acceptCall', 'declineCall', 'endCall', 'getIncomingCall', 'getActiveCall', 'getCallHistory', 'createGroupChat', 'uploadFile']);
     chatServiceSpy.getChats.and.returnValue(of([]));
     chatServiceSpy.getMessages.and.returnValue(of([]));
     chatServiceSpy.sendMessage.and.returnValue(of({} as any));
@@ -20,12 +22,56 @@ describe('DashboardComponent', () => {
     chatServiceSpy.searchUsers.and.returnValue(of([]));
     chatServiceSpy.startChat.and.returnValue(of({} as any));
     chatServiceSpy.getAllUsers.and.returnValue(of([]));
+    chatServiceSpy.sendHeartbeat.and.returnValue(EMPTY);
+    chatServiceSpy.sendTyping.and.returnValue(EMPTY);
+    chatServiceSpy.getTypingStatus.and.returnValue(of({ isTyping: false }));
+    chatServiceSpy.updateProfile.and.returnValue(of({ success: true, token: 'test' }));
+    chatServiceSpy.getUserInfo.and.returnValue(of({} as any));
+    chatServiceSpy.initiateCall.and.returnValue(of({} as any));
+    chatServiceSpy.acceptCall.and.returnValue(EMPTY);
+    chatServiceSpy.declineCall.and.returnValue(EMPTY);
+    chatServiceSpy.endCall.and.returnValue(EMPTY);
+    chatServiceSpy.getIncomingCall.and.returnValue(of(null));
+    chatServiceSpy.getActiveCall.and.returnValue(of(null));
+    chatServiceSpy.getCallHistory.and.returnValue(of([]));
+    chatServiceSpy.createGroupChat.and.returnValue(of({} as any));
+    chatServiceSpy.uploadFile.and.returnValue(of({ success: true, fileUrl: '', fileName: '', contentType: '', fileSize: 0, category: '' }));
+
+    signalRServiceSpy = jasmine.createSpyObj('SignalRService', ['startConnection', 'stopConnection', 'waitForConnection', 'sendOffer', 'sendAnswer', 'sendIceCandidate', 'sendCallSignal', 'joinChat', 'leaveChat', 'sendMarkAsRead', 'sendTyping', 'sendStopTyping'], {
+      onOfferReceived: new Subject(),
+      onAnswerReceived: new Subject(),
+      onIceCandidateReceived: new Subject(),
+      onCallSignalReceived: new Subject(),
+      onConnectionEstablished: new Subject(),
+      onConnectionClosed: new Subject(),
+      onMessageReceived: new Subject(),
+      onChatUpdated: new Subject(),
+      onUserTyping: new Subject(),
+      onUserStopTyping: new Subject(),
+      onMessagesRead: new Subject(),
+      onUserOnlineStatus: new Subject(),
+      connectionState: null,
+      isConnected: false
+    });
+    signalRServiceSpy.startConnection.and.returnValue(Promise.resolve());
+    signalRServiceSpy.stopConnection.and.returnValue(Promise.resolve());
+    signalRServiceSpy.waitForConnection.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendOffer.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendAnswer.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendIceCandidate.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendCallSignal.and.returnValue(Promise.resolve());
+    signalRServiceSpy.joinChat.and.returnValue(Promise.resolve());
+    signalRServiceSpy.leaveChat.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendMarkAsRead.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendTyping.and.returnValue(Promise.resolve());
+    signalRServiceSpy.sendStopTyping.and.returnValue(Promise.resolve());
 
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       providers: [
         { provide: Router, useValue: { navigate: routerSpy, events: of(null), createUrlTree: jasmine.createSpy(), serializeUrl: jasmine.createSpy(), url: '/dashboard' } as any },
         { provide: ChatService, useValue: chatServiceSpy },
+        { provide: SignalRService, useValue: signalRServiceSpy },
       ]
     }).compileComponents();
 
@@ -69,7 +115,7 @@ describe('DashboardComponent', () => {
   });
 
   it('should send message', () => {
-    const msg = { id: 1, chatId: 1, senderId: 1, senderName: 'Me', content: 'Hello!', messageType: 'text', isRead: false, sentAt: new Date().toISOString() };
+    const msg = { id: 1, chatId: 1, senderId: 1, senderName: 'Me', content: 'Hello!', messageType: 'text', isRead: false, isDeleted: false, sentAt: new Date().toISOString() };
     chatServiceSpy.sendMessage.and.returnValue(of(msg));
     component.selectedChatId.set(1);
     component.newMessage.set('Hello!');

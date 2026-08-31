@@ -61,8 +61,52 @@ describe('LoginComponent', () => {
     req.flush({ success: false, message: 'Invalid credentials' });
 
     expect(component.errorMessage).toBe('Invalid credentials');
+    expect(component.showEmailVerification).toBeFalse();
     expect(component.loading).toBeFalse();
     expect(routerSpy).not.toHaveBeenCalled();
+  });
+
+  it('should show inline email verification when login requires verification', () => {
+    component.credentials = { email: 'test@test.com', password: 'correct' };
+    component.onSubmit();
+
+    const req = httpMock.expectOne('https://localhost:7030/api/auth/login');
+    req.flush({ success: false, message: 'Please verify your email address before logging in.' });
+
+    expect(component.errorMessage).toBe('Please verify your email address before logging in.');
+    expect(component.showEmailVerification).toBeTrue();
+    expect(component.emailOtpSent).toBeFalse();
+  });
+
+  it('should send login verification OTP', () => {
+    component.credentials = { email: ' test@test.com ', password: 'correct' };
+    component.showEmailVerification = true;
+    component.sendLoginEmailOtp();
+
+    const req = httpMock.expectOne('https://localhost:7030/api/auth/send-otp');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ target: 'test@test.com' });
+    req.flush({ success: true, message: 'OTP sent' });
+
+    expect(component.emailOtpSent).toBeTrue();
+    expect(component.loading).toBeFalse();
+  });
+
+  it('should verify login OTP and retry login', () => {
+    component.credentials = { email: 'test@test.com', password: 'correct' };
+    component.emailOtp = '123456';
+    component.verifyLoginEmailOtp();
+
+    const verifyReq = httpMock.expectOne('https://localhost:7030/api/auth/verify-otp');
+    expect(verifyReq.request.method).toBe('POST');
+    expect(verifyReq.request.body).toEqual({ target: 'test@test.com', otp: '123456' });
+    verifyReq.flush({ success: true, message: 'OTP verified' });
+
+    const loginReq = httpMock.expectOne('https://localhost:7030/api/auth/login');
+    loginReq.flush({ success: true, message: 'Login successful', token: 'jwt-token' });
+
+    expect(localStorage.getItem('token')).toBe('jwt-token');
+    expect(routerSpy).toHaveBeenCalledWith(['/dashboard']);
   });
 
   it('should store token and navigate to dashboard on successful login', () => {

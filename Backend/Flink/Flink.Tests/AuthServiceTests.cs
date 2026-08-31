@@ -11,6 +11,7 @@ public class AuthServiceTests
 {
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
+    private readonly Mock<ISmsService> _smsServiceMock;
     private readonly Mock<IConfiguration> _configMock;
     private readonly AuthService _authService;
 
@@ -18,6 +19,7 @@ public class AuthServiceTests
     {
         _userRepoMock = new Mock<IUserRepository>();
         _emailServiceMock = new Mock<IEmailService>();
+        _smsServiceMock = new Mock<ISmsService>();
         _configMock = new Mock<IConfiguration>();
 
         var jwtSectionMock = new Mock<IConfigurationSection>();
@@ -28,13 +30,13 @@ public class AuthServiceTests
         _configMock.Setup(x => x["JwtSettings:Audience"]).Returns("FlinkAudience");
         _configMock.Setup(x => x["AppSettings:ClientUrl"]).Returns("http://localhost:4200");
 
-        _authService = new AuthService(_userRepoMock.Object, _emailServiceMock.Object, _configMock.Object);
+        _authService = new AuthService(_userRepoMock.Object, _emailServiceMock.Object, _smsServiceMock.Object, _configMock.Object);
     }
 
     [Fact]
     public async Task RegisterAsync_EmailAlreadyExists_ReturnsFailure()
     {
-        _userRepoMock.Setup(x => x.GetByEmailAsync("test@test.com")).ReturnsAsync(new User());
+        _userRepoMock.Setup(x => x.GetByEmailAsync("test@test.com")).ReturnsAsync(new User { IsEmailVerified = true });
 
         var request = new RegisterRequest
         {
@@ -201,6 +203,36 @@ public class AuthServiceTests
 
         Assert.False(result.Success);
         Assert.Equal("Invalid OTP.", result.Message);
+    }
+
+    [Fact]
+    public async Task VerifyOtpAsync_ExistingUnverifiedEmail_MarksUserVerified()
+    {
+        var user = new User
+        {
+            Email = "verify@test.com",
+            IsEmailVerified = false,
+            VerificationToken = "old-token",
+            VerificationTokenExpires = DateTime.UtcNow.AddDays(1)
+        };
+
+        _emailServiceMock.Setup(x => x.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+        _userRepoMock.Setup(x => x.GetByEmailAsync("verify@test.com")).ReturnsAsync(user);
+        _userRepoMock.Setup(x => x.UpdateAsync(user)).Returns(Task.CompletedTask);
+
+        await _authService.SendOtpAsync(new SendOtpRequest { Target = "verify@test.com" });
+        var otpField = typeof(AuthService).GetField("_otpCache", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+        var cache = (System.Collections.Concurrent.ConcurrentDictionary<string, (string Otp, DateTime ExpiresAt)>)otpField.GetValue(null)!;
+        var otp = cache["verify@test.com"].Otp;
+
+        var result = await _authService.VerifyOtpAsync(new VerifyOtpRequest { Target = "verify@test.com", Otp = otp });
+
+        Assert.True(result.Success);
+        Assert.True(user.IsEmailVerified);
+        Assert.Null(user.VerificationToken);
+        Assert.Null(user.VerificationTokenExpires);
+        _userRepoMock.Verify(x => x.UpdateAsync(user), Times.Once);
     }
 
     [Fact]

@@ -2,8 +2,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Flink.Application.DTOs;
 using Flink.Application.Interfaces;
+using Flink.web.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Flink.web.Controllers
 {
@@ -13,11 +15,13 @@ namespace Flink.web.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
+        private readonly IHubContext<ChatHub> _chatHubContext;
         private int UserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        public ChatController(IChatService chatService)
+        public ChatController(IChatService chatService, IHubContext<ChatHub> chatHubContext)
         {
             _chatService = chatService;
+            _chatHubContext = chatHubContext;
         }
 
         [HttpGet]
@@ -55,11 +59,12 @@ namespace Flink.web.Controllers
             try
             {
                 var message = await _chatService.SendMessageAsync(UserId, request);
+                await _chatHubContext.Clients.Group($"chat_{message.ChatId}").SendAsync("ReceiveMessage", message);
                 return Ok(message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Forbid(ex.Message);
+                return StatusCode(403, new { success = false, message = ex.Message });
             }
         }
 
@@ -128,6 +133,13 @@ namespace Flink.web.Controllers
             var user = await _chatService.GetUserByIdAsync(userId);
             if (user == null) return NotFound("User not found.");
             return Ok(user);
+        }
+
+        [HttpPost("create-group")]
+        public async Task<IActionResult> CreateGroupChat([FromBody] CreateGroupChatRequest request)
+        {
+            var chat = await _chatService.CreateGroupChatAsync(UserId, request);
+            return Ok(chat);
         }
     }
 }

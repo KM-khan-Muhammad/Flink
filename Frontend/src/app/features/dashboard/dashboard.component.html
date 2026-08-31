@@ -1,64 +1,74 @@
-<div class="flex h-screen w-full theme-bg theme-text overflow-hidden font-sans">
+<div class="dashboard-layout flex h-screen w-full theme-bg theme-text overflow-hidden font-sans" [class.chat-open]="selectedChatId()">
+
+  <!-- DEV INFO BANNER (only in development) -->
+  @if (isDevMode) {
+    <app-dev-info></app-dev-info>
+  }
 
   <!-- NAV BAR -->
-  <nav class="flex flex-col items-center w-[72px] min-w-[72px] theme-bg border-r theme-border py-6 gap-4 z-20">
-    <div class="flex items-center justify-center w-10 h-10 rounded-full mb-4 bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px] cursor-pointer transition-transform hover:scale-105" (click)="activePanel.set('settings')">
+  <nav class="dashboard-nav flex flex-col items-center w-[72px] min-w-[72px] theme-bg border-r theme-border py-6 gap-4 z-20" style="box-shadow: 2px 0 12px rgba(0,0,0,0.08);">
+    <div class="flex items-center justify-center w-10 h-10 rounded-full mb-4 bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px] cursor-pointer transition-transform hover:scale-110 active:scale-95" (click)="setActivePanel('settings')">
       <div class="flex items-center justify-center w-full h-full theme-bg rounded-full font-bold text-[0.8rem] theme-text">
         {{ currentUser() ? getInitials(currentUser()!.firstName + ' ' + currentUser()!.lastName) : 'U' }}
       </div>
     </div>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors group" (click)="activePanel.set('chats')" title="Chats">
-      <i class="fa-solid fa-comment-dots text-[1.4rem]"></i>
-      @if (totalUnread() > 0) { <span class="absolute top-2 right-2 bg-red-500 theme-text text-[0.6rem] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center px-1">{{ totalUnread() }}</span> }
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer group" [ngClass]="activePanel() === 'chats' ? 'nav-btn-active' : 'theme-text-secondary theme-bg-hover'" (click)="setActivePanel('chats')" title="Chats">
+      <i class="fa-solid fa-comment-dots text-[1.3rem]"></i>
+      <span class="nav-label text-[0.55rem] mt-0.5 font-medium">Chats</span>
+      @if (totalUnread() > 0) { <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[0.6rem] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 shadow-sm">{{ totalUnread() }}</span> }
     </button>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors group" (click)="activePanel.set('status')" title="Status">
-      <i class="fa-solid fa-circle-notch text-[1.4rem]"></i>
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer group" [ngClass]="activePanel() === 'status' ? 'nav-btn-active' : 'theme-text-secondary theme-bg-hover'" (click)="setActivePanel('status')" title="Status">
+      <i class="fa-solid fa-circle-notch text-[1.3rem]"></i>
+      <span class="nav-label text-[0.55rem] mt-0.5 font-medium">Status</span>
     </button>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors group" (click)="activePanel.set('groups')" title="Groups">
-      <i class="fa-solid fa-users text-[1.4rem]"></i>
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer group" [ngClass]="activePanel() === 'groups' ? 'nav-btn-active' : 'theme-text-secondary theme-bg-hover'" (click)="setActivePanel('groups')" title="Groups">
+      <i class="fa-solid fa-users text-[1.3rem]"></i>
+      <span class="nav-label text-[0.55rem] mt-0.5 font-medium">Groups</span>
     </button>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors group" (click)="activePanel.set('calls')" title="Calls">
-      <i class="fa-solid fa-phone text-[1.4rem]"></i>
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer group" [ngClass]="activePanel() === 'calls' ? 'nav-btn-active' : 'theme-text-secondary theme-bg-hover'" (click)="setActivePanel('calls')" title="Calls">
+      <i class="fa-solid fa-phone text-[1.3rem]"></i>
+      <span class="nav-label text-[0.55rem] mt-0.5 font-medium">Calls</span>
     </button>
 
     <div class="flex-1"></div>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors group" (click)="activePanel.set('settings')" title="Settings">
-      <i class="fa-solid fa-gear text-[1.4rem]"></i>
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer group" [ngClass]="activePanel() === 'settings' ? 'nav-btn-active' : 'theme-text-secondary theme-bg-hover'" (click)="setActivePanel('settings')" title="Settings">
+      <i class="fa-solid fa-gear text-[1.3rem]"></i>
+      <span class="nav-label text-[0.55rem] mt-0.5 font-medium">Settings</span>
     </button>
 
-    <button class="relative flex items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer transition-colors text-red-500 hover:theme-bg-elevated" (click)="logout()" title="Log Out">
-      <i class="fa-solid fa-right-from-bracket text-[1.4rem]"></i>
+    <button class="nav-btn relative flex flex-col items-center justify-center w-12 h-12 rounded-xl border-none cursor-pointer text-red-500 hover:bg-red-500/10" (click)="logout()" title="Log Out">
+      <i class="fa-solid fa-right-from-bracket text-[1.3rem]"></i>
     </button>
   </nav>
 
   <!-- PANEL -->
-  <aside class="flex flex-col w-[380px] min-w-[380px] border-r theme-border theme-bg" [ngClass]="{'hidden md:flex': selectedChatId()}">
+  <aside class="dashboard-aside flex flex-col w-[380px] min-w-[380px] border-r theme-border theme-bg" [ngClass]="{'hidden md:flex': selectedChatId()}">
 
     <!-- CHATS PANEL -->
     @if (activePanel() === 'chats') {
       <div class="flex items-center justify-between px-5 py-5 border-b theme-border">
         <h2 class="text-xl font-bold theme-text tracking-tight">Messages</h2>
-        <button class="flex items-center justify-center w-9 h-9 theme-text-secondary hover:theme-text transition-colors" (click)="openNewChatModal()" title="New chat">
-          <i class="fa-solid fa-pen-to-square text-[1.2rem]"></i>
+        <button class="flex items-center justify-center w-9 h-9 rounded-full theme-text-secondary theme-text theme-bg-elevated transition-all active:scale-90" (click)="openNewChatModal()" title="New chat">
+          <i class="fa-solid fa-pen-to-square text-[1.15rem]"></i>
         </button>
       </div>
 
       <div class="px-4 py-3">
         <div class="relative">
-          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted text-[0.82rem] pointer-events-none">🔍</span>
-          <input class="w-full py-2 pl-10 pr-3.5 rounded-lg theme-bg-elevated theme-text text-[0.9rem] outline-none transition-all placeholder-neutral-500 border border-transparent focus:theme-border focus:theme-bg" placeholder="Search" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted text-[0.85rem] pointer-events-none"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input class="input-glow w-full py-2.5 pl-10 pr-3.5 rounded-xl theme-bg-elevated theme-text text-[0.9rem] outline-none transition-all placeholder-neutral-500 border border-transparent focus:theme-border" placeholder="Search..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" />
         </div>
       </div>
       <div class="flex-1 overflow-y-auto scrollbar-none">
         @for (c of filteredChats(); track c.id) {
-          <div class="flex items-center gap-4 px-5 py-3 cursor-pointer transition-colors relative group" [ngClass]="c.id === selectedChatId() ? 'theme-bg-elevated' : 'hover:theme-bg-hover'" (click)="selectChat(c.id)" (contextmenu)="openUserInfoFromChatItem($event, c)">
+          <div class="chat-list-item chat-item flex items-center gap-4 px-5 py-3.5 cursor-pointer relative group" [ngClass]="c.id === selectedChatId() ? 'chat-item-active theme-bg-elevated' : 'theme-bg-hover border-l-[3px] border-transparent'" (click)="selectChat(c.id)" (contextmenu)="openUserInfoFromChatItem($event, c)">
             <div class="relative flex-shrink-0">
-              <div class="flex items-center justify-center w-14 h-14 rounded-full font-semibold text-[1rem] theme-text" [ngClass]="c.unreadCount > 0 ? 'bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px]' : 'theme-bg-avatar'">
+              <div class="flex items-center justify-center w-12 h-12 rounded-full font-semibold text-[0.95rem] theme-text" [ngClass]="c.unreadCount > 0 ? 'bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px]' : 'theme-bg-avatar'">
                 @if (c.unreadCount > 0) {
                   <div class="flex items-center justify-center w-full h-full theme-bg rounded-full">{{ getInitials(c.otherUserName) }}</div>
                 } @else {
@@ -66,22 +76,29 @@
                 }
               </div>
               @if (c.otherUserOnline) {
-                <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 theme-bg"></div>
+                <div class="absolute bottom-0.5 right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 theme-bg shadow-sm"></div>
               }
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-center gap-2 mb-0.5">
                 <span class="font-semibold text-[0.95rem] theme-text whitespace-nowrap overflow-hidden text-ellipsis">{{ c.otherUserName }}</span>
+                <span class="text-[0.7rem] whitespace-nowrap flex-shrink-0" [ngClass]="c.unreadCount > 0 ? 'theme-text font-medium' : 'theme-text-muted'">{{ formatTime(c.lastMessageTime) }}</span>
               </div>
               <div class="flex items-center justify-between gap-1.5">
-                <span class="text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis flex-1" [ngClass]="c.unreadCount > 0 ? 'theme-text font-medium' : 'theme-text-secondary'">{{ c.lastMessage }}</span>
-                <span class="text-[0.75rem] whitespace-nowrap flex-shrink-0" [ngClass]="c.unreadCount > 0 ? 'theme-text-secondary' : 'theme-text-muted'">{{ formatTime(c.lastMessageTime) }}</span>
+                <span class="text-[0.83rem] whitespace-nowrap overflow-hidden text-ellipsis flex-1" [ngClass]="c.unreadCount > 0 ? 'theme-text font-medium' : 'theme-text-secondary'">{{ c.lastMessage }}</span>
+                @if (c.unreadCount > 0) {
+                  <span class="bg-[#7c5cbf] text-white text-[0.65rem] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 flex-shrink-0">{{ c.unreadCount }}</span>
+                }
               </div>
             </div>
           </div>
         } @empty {
-          <div class="text-center py-10 px-5 theme-text-muted text-[0.85rem]">
-            <p>No messages yet</p>
+          <div class="flex flex-col items-center justify-center py-16 px-5">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));">
+              <i class="fa-regular fa-comments text-3xl" style="color: var(--accent);"></i>
+            </div>
+            <p class="text-[0.95rem] font-semibold theme-text mb-1">No messages yet</p>
+            <p class="text-[0.8rem] theme-text-secondary text-center">Start a conversation with someone</p>
           </div>
         }
       </div>
@@ -93,13 +110,28 @@
         <h2 class="text-xl font-bold theme-text tracking-tight">Status</h2>
       </div>
       <div class="p-4">
-        <div class="flex items-center gap-4 cursor-pointer p-2 rounded-xl transition-colors hover:theme-bg-elevated">
-          <div class="flex items-center justify-center w-14 h-14 rounded-full border theme-border theme-bg-elevated text-[1.2rem] theme-text-secondary">+</div>
+        <div class="flex items-center gap-4 cursor-pointer p-3 rounded-xl transition-all theme-bg-elevated active:scale-[0.98]" (click)="openStatusModal()">
+          <div class="flex items-center justify-center w-14 h-14 rounded-full border-2 dashed theme-border theme-bg-elevated text-[1.2rem] theme-text-secondary">+</div>
           <div>
             <div class="font-semibold text-[0.95rem] theme-text">My Status</div>
             <div class="text-[0.85rem] theme-text-muted">Tap to add status update</div>
           </div>
         </div>
+        @if (statuses().length > 0) {
+          <div class="mt-4 flex flex-col gap-3">
+            @for (status of statuses(); track $index) {
+              <div class="p-3 rounded-xl theme-bg-elevated border theme-border">
+                @if (status.imageUrl) {
+                  <img [src]="status.imageUrl" class="w-full h-40 object-cover rounded-lg mb-2" />
+                }
+                @if (status.text) {
+                  <p class="text-[0.9rem] theme-text">{{ status.text }}</p>
+                }
+                <div class="text-[0.7rem] theme-text-muted mt-1">{{ formatTime(status.createdAt) }}</div>
+              </div>
+            }
+          </div>
+        }
       </div>
     }
 
@@ -107,25 +139,34 @@
     @if (activePanel() === 'groups') {
       <div class="flex items-center justify-between px-5 py-5 border-b theme-border">
         <h2 class="text-xl font-bold theme-text tracking-tight">Groups</h2>
+        <button class="flex items-center justify-center w-9 h-9 rounded-full theme-bg-elevated theme-text-secondary cursor-pointer transition-all hover:theme-text active:scale-90" (click)="openCreateGroupModal()" title="Create Group">
+          <i class="fa-solid fa-plus text-[1.1rem]"></i>
+        </button>
       </div>
       <div class="flex-1 overflow-y-auto scrollbar-none">
         @for (c of groupChats(); track c.id) {
-          <div class="flex items-center gap-4 px-5 py-3 cursor-pointer transition-colors hover:theme-bg-elevated">
+          <div class="chat-item flex items-center gap-4 px-5 py-3.5 cursor-pointer transition-all theme-bg-elevated active:scale-[0.98]">
             <div class="relative flex-shrink-0">
-              <div class="flex items-center justify-center w-14 h-14 rounded-full theme-bg-avatar font-semibold text-[1rem] theme-text">{{ getInitials(c.name || c.otherUserName) }}</div>
+              <div class="flex items-center justify-center w-12 h-12 rounded-full theme-bg-avatar font-semibold text-[0.95rem] theme-text">{{ getInitials(c.name || c.otherUserName) }}</div>
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-center gap-2 mb-0.5">
                 <span class="font-semibold text-[0.95rem] theme-text whitespace-nowrap overflow-hidden text-ellipsis">{{ c.name || c.otherUserName }}</span>
+                <span class="text-[0.7rem] whitespace-nowrap flex-shrink-0 theme-text-muted">{{ formatTime(c.lastMessageTime) }}</span>
               </div>
               <div class="flex items-center justify-between gap-1.5">
-                <span class="text-[0.85rem] whitespace-nowrap overflow-hidden text-ellipsis flex-1" [ngClass]="c.unreadCount > 0 ? 'theme-text font-medium' : 'theme-text-secondary'">{{ c.lastMessage }}</span>
-                <span class="text-[0.75rem] whitespace-nowrap flex-shrink-0" [ngClass]="c.unreadCount > 0 ? 'theme-text-secondary' : 'theme-text-muted'">{{ formatTime(c.lastMessageTime) }}</span>
+                <span class="text-[0.83rem] whitespace-nowrap overflow-hidden text-ellipsis flex-1" [ngClass]="c.unreadCount > 0 ? 'theme-text font-medium' : 'theme-text-secondary'">{{ c.lastMessage }}</span>
+                @if (c.unreadCount > 0) {
+                  <span class="bg-[#7c5cbf] text-white text-[0.65rem] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1 flex-shrink-0">{{ c.unreadCount }}</span>
+                }
               </div>
             </div>
           </div>
         } @empty {
-          <div class="text-center py-10 px-5 theme-text-muted text-[0.85rem]">No groups yet</div>
+          <div class="text-center py-10 px-5 theme-text-muted text-[0.85rem]">
+            <i class="fa-solid fa-users text-3xl mb-3 block opacity-40"></i>
+            No groups yet
+          </div>
         }
       </div>
     }
@@ -133,66 +174,133 @@
     <!-- CALLS PANEL -->
     @if (activePanel() === 'calls') {
       <div class="flex items-center justify-between px-5 py-5 border-b theme-border">
-        <h2 class="text-xl font-bold theme-text tracking-tight">Calls</h2>
+        <h2 class="text-xl font-bold theme-text tracking-tight">Recents</h2>
+        <div class="flex items-center gap-1 bg-white/5 rounded-xl p-1">
+          <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+          <span class="text-[0.7rem] text-green-400 font-semibold pr-1">Live</span>
+        </div>
       </div>
-      <div class="text-center py-10 px-5 theme-text-muted text-[0.85rem]">
-        <p>No recent calls</p>
-      </div>
+      @if (callHistory().length === 0) {
+        <div class="flex flex-col items-center justify-center flex-1 py-16 px-5">
+          <div class="w-20 h-20 rounded-full flex items-center justify-center mb-5" style="background: linear-gradient(135deg, rgba(124,92,191,0.15), rgba(224,64,251,0.1));">
+            <i class="fa-solid fa-phone-slash text-3xl" style="color: var(--accent);"></i>
+          </div>
+          <p class="text-[0.95rem] font-semibold theme-text mb-1">No recent calls</p>
+          <p class="text-[0.8rem] theme-text-secondary text-center">Your call history will appear here</p>
+        </div>
+      } @else {
+        <div class="flex-1 overflow-y-auto scrollbar-none">
+          @for (call of callHistory(); track call.id) {
+            <div class="call-history-item flex items-center gap-3.5 px-4 py-3.5 cursor-pointer transition-all theme-bg-hover border-b theme-border active:scale-[0.98]">
+              <!-- Avatar -->
+              <div class="relative flex-shrink-0">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px] shadow-md">
+                  <div class="w-full h-full theme-bg rounded-full flex items-center justify-center text-sm font-bold theme-text">
+                    {{ getInitials(call.callerId === currentUser()?.id ? call.receiverName : call.callerName) }}
+                  </div>
+                </div>
+                <!-- Status badge -->
+                <div class="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 theme-bg flex items-center justify-center"
+                     [ngClass]="call.status === 'connected' ? 'bg-green-500' : 'bg-red-500'">
+                  @if (call.status === 'connected') {
+                    <i class="fa-solid fa-check text-[0.45rem] text-white"></i>
+                  } @else {
+                    <i class="fa-solid fa-xmark text-[0.45rem] text-white"></i>
+                  }
+                </div>
+              </div>
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-[0.9rem] theme-text truncate">
+                  {{ call.callerId === currentUser()?.id ? call.receiverName : call.callerName }}
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <!-- Direction arrow -->
+                  @if (call.callerId === currentUser()?.id) {
+                    <i class="fa-solid fa-arrow-up-right text-[0.6rem] text-blue-400"></i>
+                    <span class="text-[0.75rem] text-blue-400 font-medium">Outgoing</span>
+                  } @else {
+                    <i class="fa-solid fa-arrow-down-left text-[0.6rem] text-green-400"></i>
+                    <span class="text-[0.75rem] text-green-400 font-medium">Incoming</span>
+                  }
+                  <span class="text-[0.7rem] theme-text-secondary">·</span>
+                  <i class="text-[0.65rem] theme-text-secondary" [ngClass]="call.callType === 'video' ? 'fa-solid fa-video' : 'fa-solid fa-phone'"></i>
+                  <span class="text-[0.75rem] theme-text-secondary">{{ call.callType === 'video' ? 'Video' : 'Voice' }}</span>
+                </div>
+              </div>
+              <!-- Time & duration -->
+              <div class="text-right flex-shrink-0 flex flex-col items-end gap-1">
+                <div class="text-[0.75rem] theme-text-secondary">{{ formatCallTime(call.startedAt) }}</div>
+                @if (call.answeredAt && call.endedAt) {
+                  <div class="flex items-center gap-1 px-2 py-0.5 rounded-full" style="background: rgba(124,92,191,0.12);">
+                    <i class="fa-regular fa-clock text-[0.55rem]" style="color: var(--accent);"></i>
+                    <span class="text-[0.7rem] font-mono" style="color: var(--accent);">{{ formatCallDurationFromTimes(call.answeredAt, call.endedAt) }}</span>
+                  </div>
+                } @else if (call.status === 'declined') {
+                  <span class="text-[0.7rem] text-red-400 font-medium">Declined</span>
+                } @else if (call.status === 'no-answer') {
+                  <span class="text-[0.7rem] text-yellow-400 font-medium">No answer</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
     }
 
     <!-- SETTINGS PANEL -->
     @if (activePanel() === 'settings') {
-      <div class="flex items-center justify-between px-5 py-5 border-b" style="border-color: var(--border-color);">
-        <h2 class="text-xl font-bold tracking-tight" style="color: var(--text-primary);">Settings</h2>
+      <div class="flex items-center justify-between px-5 py-5 border-b theme-border">
+        <h2 class="text-xl font-bold theme-text tracking-tight">Settings</h2>
       </div>
-      <div class="flex items-center gap-4 px-5 py-6 border-b" style="border-color: var(--border-color);">
-        <div class="flex items-center justify-center w-[72px] h-[72px] rounded-full font-bold text-[1.8rem]" style="background: var(--bg-avatar); color: var(--text-primary);">
-          {{ currentUser() ? getInitials(currentUser()!.firstName + ' ' + currentUser()!.lastName) : 'U' }}
+      <div class="flex items-center gap-4 px-5 py-6 border-b theme-border">
+        <div class="flex items-center justify-center w-[72px] h-[72px] rounded-full font-bold text-[1.8rem] bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px]">
+          <div class="flex items-center justify-center w-full h-full theme-bg rounded-full">{{ currentUser() ? getInitials(currentUser()!.firstName + ' ' + currentUser()!.lastName) : 'U' }}</div>
         </div>
         <div>
-          <div class="font-semibold text-[1.1rem]" style="color: var(--text-primary);">{{ currentUser()?.fullName || 'User' }}</div>
-          <div class="text-[0.85rem] mt-1" style="color: var(--text-secondary);">{{ currentUser()?.phoneNumber || '' }}</div>
-          <div class="text-[0.85rem]" style="color: var(--text-secondary);">{{ currentUser()?.email || '' }}</div>
+          <div class="font-semibold text-[1.1rem] theme-text">{{ currentUser()?.fullName || 'User' }}</div>
+          <div class="text-[0.85rem] mt-1 theme-text-secondary">{{ currentUser()?.phoneNumber || '' }}</div>
+          <div class="text-[0.85rem] theme-text-secondary">{{ currentUser()?.email || '' }}</div>
         </div>
       </div>
       <div class="p-2 overflow-y-auto flex-1">
-        <div class="flex items-start gap-3.5 px-3 py-3 rounded-lg transition-colors mb-1">
-          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0" style="color: var(--text-secondary);">
+        <div class="flex items-start gap-3.5 px-3 py-3 rounded-xl transition-colors mb-1 theme-bg-hover">
+          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 theme-text-secondary">
              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
           <div class="w-full">
-            <div class="font-medium text-[0.95rem]" style="color: var(--text-primary);">Personal Info</div>
-            <div class="text-[0.85rem] mt-0.5" style="color: var(--text-secondary);">{{ currentUser()?.phoneNumber || 'No number' }}</div>
+            <div class="font-medium text-[0.95rem] theme-text">Personal Info</div>
+            <div class="text-[0.85rem] mt-0.5 theme-text-secondary">{{ currentUser()?.phoneNumber || 'No number' }}</div>
             @if (!editingName()) {
               <button class="px-0 py-1.5 border-none cursor-pointer bg-transparent font-semibold text-[0.85rem] mt-1 transition-colors hover:opacity-80" style="color: var(--accent);" (click)="startEditName()">Edit Name</button>
             } @else {
               <div class="flex gap-2 mt-3">
-                <input class="w-full py-2 px-3 rounded-lg border text-[0.85rem] outline-none transition-colors" style="border-color: var(--border-color); background: var(--bg-input); color: var(--text-primary);" placeholder="First Name" [ngModel]="editFirstName()" (ngModelChange)="editFirstName.set($event)" />
-                <input class="w-full py-2 px-3 rounded-lg border text-[0.85rem] outline-none transition-colors" style="border-color: var(--border-color); background: var(--bg-input); color: var(--text-primary);" placeholder="Last Name" [ngModel]="editLastName()" (ngModelChange)="editLastName.set($event)" />
+                <input class="input-glow w-full py-2 px-3 rounded-lg border text-[0.85rem] outline-none transition-colors theme-border theme-bg-input theme-text" placeholder="First Name" [ngModel]="editFirstName()" (ngModelChange)="editFirstName.set($event)" />
+                <input class="input-glow w-full py-2 px-3 rounded-lg border text-[0.85rem] outline-none transition-colors theme-border theme-bg-input theme-text" placeholder="Last Name" [ngModel]="editLastName()" (ngModelChange)="editLastName.set($event)" />
               </div>
               <div class="flex gap-2 mt-2">
-                <button class="px-4 py-1.5 rounded-lg border-none cursor-pointer theme-text font-medium text-[0.85rem] transition-all hover:opacity-90 disabled:opacity-50" style="background: var(--accent);" (click)="saveName()" [disabled]="!editFirstName().trim()">Save</button>
-                <button class="px-4 py-1.5 rounded-lg border cursor-pointer bg-transparent font-medium text-[0.85rem] transition-colors" style="border-color: var(--border-color); color: var(--text-secondary);" (click)="cancelEditName()">Cancel</button>
+                <button class="px-4 py-1.5 rounded-lg border-none cursor-pointer theme-text font-medium text-[0.85rem] transition-all hover:opacity-90 disabled:opacity-50 active:scale-95" style="background: var(--accent);" (click)="saveName()" [disabled]="!editFirstName().trim()">Save</button>
+                <button class="px-4 py-1.5 rounded-lg border cursor-pointer bg-transparent font-medium text-[0.85rem] transition-colors theme-border theme-text-secondary" (click)="cancelEditName()">Cancel</button>
               </div>
             }
           </div>
         </div>
 
-        <div class="flex items-start gap-3.5 px-3 py-3 rounded-lg transition-colors mb-1">
-          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0" style="color: var(--text-secondary);">
+        <div class="flex items-start gap-3.5 px-3 py-3 rounded-xl transition-colors mb-1 theme-bg-hover">
+          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 theme-text-secondary">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
           </div>
           <div class="w-full">
-            <div class="font-medium text-[0.95rem] mb-3" style="color: var(--text-primary);">Appearance</div>
-            <div class="flex rounded-lg overflow-hidden border" style="border-color: var(--border-color);">
-              <button class="flex-1 py-2 text-[0.85rem] font-semibold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
+            <div class="font-medium text-[0.95rem] mb-3 theme-text">Appearance</div>
+            <div class="flex rounded-xl overflow-hidden border theme-border">
+              <button class="flex-1 py-2.5 text-[0.85rem] font-semibold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
                 [style.background]="theme() === 'system' ? 'var(--accent)' : 'var(--bg-input)'"
                 [style.color]="theme() === 'system' ? '#fff' : 'var(--text-secondary)'"
                 (click)="setTheme('system')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                 System
               </button>
-              <button class="flex-1 py-2 text-[0.85rem] font-semibold transition-all cursor-pointer border-none border-l border-r flex items-center justify-center gap-1.5"
+              <button class="flex-1 py-2.5 text-[0.85rem] font-semibold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
                 [style.background]="theme() === 'light' ? 'var(--accent)' : 'var(--bg-input)'"
                 [style.color]="theme() === 'light' ? '#fff' : 'var(--text-secondary)'"
                 style="border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color);"
@@ -200,7 +308,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 Light
               </button>
-              <button class="flex-1 py-2 text-[0.85rem] font-semibold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
+              <button class="flex-1 py-2.5 text-[0.85rem] font-semibold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5"
                 [style.background]="theme() === 'dark' ? 'var(--accent)' : 'var(--bg-input)'"
                 [style.color]="theme() === 'dark' ? '#fff' : 'var(--text-secondary)'"
                 (click)="setTheme('dark')">
@@ -211,20 +319,20 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3.5 px-3 py-3 rounded-lg cursor-pointer transition-colors mb-1" style="color: var(--text-primary);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0" style="color: var(--text-secondary);">
+        <div class="flex items-center gap-3.5 px-3 py-3 rounded-xl cursor-pointer transition-all mb-1 theme-text theme-bg-hover active:scale-[0.98]" (click)="showComingSoon('Notifications')">
+          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 theme-text-secondary">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
           <div><div class="font-medium text-[0.95rem]">Notifications</div></div>
         </div>
-        <div class="flex items-center gap-3.5 px-3 py-3 rounded-lg cursor-pointer transition-colors mb-1" style="color: var(--text-primary);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0" style="color: var(--text-secondary);">
+        <div class="flex items-center gap-3.5 px-3 py-3 rounded-xl cursor-pointer transition-all mb-1 theme-text theme-bg-hover active:scale-[0.98]" (click)="showComingSoon('Privacy and Security')">
+          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 theme-text-secondary">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <div><div class="font-medium text-[0.95rem]">Privacy and Security</div></div>
         </div>
-        <div class="flex items-center gap-3.5 px-3 py-3 rounded-lg cursor-pointer transition-colors mb-1" style="color: var(--text-primary);" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
-          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0" style="color: var(--text-secondary);">
+        <div class="flex items-center gap-3.5 px-3 py-3 rounded-xl cursor-pointer transition-all mb-1 theme-text theme-bg-hover active:scale-[0.98]" (click)="showComingSoon('Data and Storage')">
+          <div class="flex items-center justify-center w-10 h-10 flex-shrink-0 theme-text-secondary">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
           <div><div class="font-medium text-[0.95rem]">Data and Storage</div></div>
@@ -234,19 +342,21 @@
   </aside>
 
   <!-- CHAT WINDOW -->
-  <main class="flex-1 flex flex-col theme-bg relative border-l theme-border" [ngClass]="{'hidden md:flex': !selectedChatId()}">
+  <main class="dashboard-main flex-1 flex flex-col theme-bg relative border-l theme-border" [ngClass]="{'hidden md:flex': !selectedChatId()}">
     @if (selectedChat(); as chat) {
-      <header class="flex items-center justify-between px-6 py-4 theme-bg border-b theme-border z-10">
+      <header class="chat-header flex items-center justify-between px-6 py-4 theme-bg border-b theme-border z-10" style="box-shadow: 0 1px 8px rgba(0,0,0,0.06);">
         <div class="flex items-center gap-3 cursor-pointer" (click)="openUserInfoFromHeader()">
           @if (selectedChatId()) {
-            <button class="flex items-center justify-center w-9 h-9 rounded-full bg-transparent theme-text-secondary cursor-pointer transition-all hover:theme-bg-elevated mr-1 md:hidden" (click)="goBack(); $event.stopPropagation()">
+            <button class="flex items-center justify-center w-9 h-9 rounded-full bg-transparent theme-text-secondary cursor-pointer transition-all theme-bg-elevated active:scale-90 mr-1 md:hidden" (click)="goBack(); $event.stopPropagation()">
               <i class="fa-solid fa-chevron-left text-[1.2rem]"></i>
             </button>
           }
           <div class="relative flex-shrink-0">
-            <div class="flex items-center justify-center w-11 h-11 rounded-full theme-bg-avatar font-semibold text-[0.9rem] theme-text">{{ getInitials(chat.otherUserName) }}</div>
+            <div class="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px]">
+              <div class="flex items-center justify-center w-full h-full theme-bg rounded-full font-semibold text-[0.85rem] theme-text">{{ getInitials(chat.otherUserName) }}</div>
+            </div>
             @if (chat.otherUserOnline) {
-              <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 theme-bg"></div>
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 theme-bg shadow-sm"></div>
             }
           </div>
           <div>
@@ -255,34 +365,37 @@
               @if (isOtherUserTyping()) {
                 <span class="text-green-500 font-medium">typing...</span>
               } @else if (chat.otherUserOnline) {
-                <span class="text-green-500">Active now</span>
+                <span class="text-green-500 font-medium">Active now</span>
               } @else {
                 <span class="theme-text-secondary">{{ chat.isGroup ? 'Group' : 'Offline' }}</span>
               }
             </div>
           </div>
         </div>
-        <div class="flex gap-4 pr-2">
-          <button class="theme-text-secondary hover:theme-text transition-colors" title="Voice call">
-            <i class="fa-solid fa-phone text-[1.2rem]"></i>
-          </button>
-          <button class="theme-text-secondary hover:theme-text transition-colors" title="Video call">
-            <i class="fa-solid fa-video text-[1.2rem]"></i>
-          </button>
-          <button class="theme-text-secondary hover:theme-text transition-colors" title="Info">
-             <i class="fa-solid fa-circle-info text-[1.2rem]"></i>
+        <div class="flex gap-2 pr-2">
+          @if (!chat.isGroup) {
+            <button class="flex items-center justify-center w-9 h-9 rounded-full theme-text-secondary theme-text theme-bg-elevated transition-all active:scale-90" title="Voice call" (click)="startCall('voice'); $event.stopPropagation()">
+              <i class="fa-solid fa-phone text-[1.1rem]"></i>
+            </button>
+            <button class="flex items-center justify-center w-9 h-9 rounded-full theme-text-secondary theme-text theme-bg-elevated transition-all active:scale-90" title="Video call" (click)="startCall('video'); $event.stopPropagation()">
+              <i class="fa-solid fa-video text-[1.1rem]"></i>
+            </button>
+          }
+          <button class="flex items-center justify-center w-9 h-9 rounded-full theme-text-secondary theme-text theme-bg-elevated transition-all active:scale-90" title="Info" (click)="openUserInfoFromHeader(); $event.stopPropagation()">
+             <i class="fa-solid fa-circle-info text-[1.1rem]"></i>
           </button>
         </div>
       </header>
 
       <!-- REPLY PREVIEW -->
       @if (replyingTo()) {
-        <div class="px-6 py-3 theme-bg-elevated border-b theme-border flex items-center gap-3 animate-[fadeInUp_0.15s_ease]">
+        <div class="reply-preview-bar px-6 py-3 theme-bg-elevated border-b theme-border flex items-center gap-3 animate-[fadeInUp_0.15s_ease]">
+          <div class="w-1 h-10 rounded-full" style="background: var(--accent);"></div>
           <div class="flex-1 min-w-0">
-            <div class="text-[0.75rem] font-semibold theme-text-secondary mb-0.5">Replying to {{ replyingTo()!.senderName }}</div>
+            <div class="text-[0.75rem] font-semibold mb-0.5" style="color: var(--accent);">Replying to {{ replyingTo()!.senderName }}</div>
             <div class="text-[0.85rem] theme-text truncate">{{ replyingTo()!.content }}</div>
           </div>
-          <button class="theme-text-muted hover:theme-text transition-colors text-[1.1rem]" (click)="cancelReply()">
+          <button class="theme-text-muted theme-text transition-colors text-[1.1rem] active:scale-90" (click)="cancelReply()">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -290,48 +403,45 @@
 
       <!-- EDIT MESSAGE PREVIEW -->
       @if (editingMessage()) {
-        <div class="px-6 py-3 theme-bg-elevated border-b theme-border flex items-center gap-3 animate-[fadeInUp_0.15s_ease]">
+        <div class="reply-preview-bar px-6 py-3 theme-bg-elevated border-b theme-border flex items-center gap-3 animate-[fadeInUp_0.15s_ease]">
+          <div class="w-1 h-10 rounded-full bg-amber-500"></div>
           <div class="flex-1 min-w-0">
-            <div class="text-[0.75rem] font-semibold theme-text-secondary mb-0.5">Editing message</div>
-            <input class="w-full py-1.5 px-3 rounded-lg border theme-border theme-bg theme-text text-[0.85rem] outline-none"
+            <div class="text-[0.75rem] font-semibold text-amber-500 mb-0.5">Editing message</div>
+            <input class="input-glow w-full py-1.5 px-3 rounded-lg border theme-border theme-bg theme-text text-[0.85rem] outline-none"
                    [ngModel]="editContent()" (ngModelChange)="editContent.set($event)"
-                   (keydown.enter)="saveEditMessage()" (keydown.escape)="cancelEditMessage()" autofocus />
+                   (keydown.enter)="saveEditMessage()" (keydown.escape)="cancelEditMessage()" #editMsgInput />
           </div>
           <div class="flex gap-2">
-            <button class="text-[#7c5cbf] text-[0.8rem] font-semibold hover:text-[#6a4aad] transition-colors" (click)="saveEditMessage()">Save</button>
-            <button class="theme-text-muted hover:theme-text transition-colors text-[1.1rem]" (click)="cancelEditMessage()">
+            <button class="text-[#7c5cbf] text-[0.8rem] font-semibold hover:text-[#6a4aad] transition-colors active:scale-95" (click)="saveEditMessage()">Save</button>
+            <button class="theme-text-muted theme-text transition-colors text-[1.1rem] active:scale-90" (click)="cancelEditMessage()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
         </div>
       }
 
-      <div class="flex-1 overflow-y-auto overflow-x-hidden pt-6 pb-8 px-4 flex flex-col gap-1.5 relative scrollbar-thin scrollbar-thumb-neutral-800" #messagesArea (click)="closeContextMenu()">
+      <div class="messages-area flex-1 min-h-0 overflow-y-auto pt-6 pb-8 px-6 relative scrollbar-thin scrollbar-thumb-neutral-800" #messagesArea (click)="closeContextMenu(); closeEmojiPicker()" (scroll)="onMessagesScroll()">
+        <div class="flex flex-col gap-1">
         @for (msg of currentMessages(); track msg.id; let i = $index) {
           <!-- DATE SEPARATOR -->
           @if (shouldShowDateSeparator(i)) {
-            <div class="flex justify-center my-4">
-              <span class="px-4 py-1.5 rounded-full text-[0.75rem] font-medium theme-bg-elevated theme-text-muted">{{ formatDateSeparator(msg.sentAt) }}</span>
+            <div class="flex justify-center my-3">
+              <span class="px-4 py-1.5 rounded-full text-[0.7rem] font-medium theme-bg-elevated theme-text-muted shadow-sm">{{ formatDateSeparator(msg.sentAt) }}</span>
             </div>
           }
 
-          <div class="flex mb-1.5 animate-[msgIn_0.2s_ease] group/msg pr-2" [ngClass]="isCurrentUser(msg.senderId) ? 'justify-end' : 'justify-start'"
+          <div class="flex mb-0.5 msg-enter group/msg" [ngClass]="[isCurrentUser(msg.senderId) ? 'justify-end' : 'justify-start', i > 0 && currentMessages()[i-1].senderId === msg.senderId ? 'mt-0' : 'mt-2']"
                (contextmenu)="openContextMenu($event, msg)">
-            @if (!isCurrentUser(msg.senderId)) {
-               <div class="w-7 h-7 rounded-full theme-bg-avatar mr-2 flex-shrink-0 flex items-center justify-center text-[10px] theme-text-secondary self-end mb-4">
-                 {{ getInitials(msg.senderName || chat.otherUserName) }}
-               </div>
-            }
-            <div class="max-w-[70%] flex flex-col">
+            <div class="msg-bubble-container max-w-[65%] min-w-0 flex flex-col">
               <!-- REPLY QUOTE -->
               @if (msg.replyToMessageId && msg.replyToMessageContent) {
-                <div class="px-3 py-1.5 text-[0.75rem] border-l-2 mb-0 opacity-80"
+                <div class="px-3 py-1.5 text-[0.75rem] border-l-2 opacity-80"
                      [ngClass]="isCurrentUser(msg.senderId) ? 'rounded-t-[18px] bg-[#6a4aad] border-white/40 text-white/80' : 'rounded-t-[18px] theme-bg-elevated border-[var(--accent)] theme-text-secondary'">
                   <div class="font-semibold text-[0.7rem]">{{ msg.replyToMessageSenderName }}</div>
                   <div class="truncate">{{ msg.replyToMessageContent }}</div>
                 </div>
               }
-              <div class="px-4 py-2.5 text-[0.95rem] leading-relaxed relative break-words"
+              <div class="px-4 py-2.5 text-[0.93rem] leading-relaxed relative break-words overflow-hidden"
                    [ngClass]="[
                      isCurrentUser(msg.senderId)
                        ? (msg.replyToMessageId ? 'bubble-right-reply' : 'bubble-right')
@@ -339,13 +449,60 @@
                      msg.isDeleted ? 'italic opacity-60' : ''
                    ]">
                 @if (msg.isDeleted) {
-                  <span class="inline text-[0.85rem]">This message was deleted</span>
+                  <span class="inline text-[0.85rem]"><i class="fa-solid fa-ban mr-1.5 text-[0.75rem] opacity-60"></i>This message was deleted</span>
+                } @else if (msg.messageType === 'voice') {
+                  <div class="flex items-center gap-2.5 min-w-[210px] py-1">
+                    <button class="voice-play-btn flex items-center justify-center w-9 h-9 rounded-full shrink-0"
+                            [ngClass]="isCurrentUser(msg.senderId) ? 'bg-white/20 text-white hover:bg-white/30' : 'theme-bg theme-text-secondary theme-bg-elevated'"
+                            (click)="toggleVoice($event, msg)">
+                      <i class="fa-solid text-[0.65rem] ml-0.5" [ngClass]="playingVoiceId() === msg.id ? 'fa-pause' : 'fa-play'"></i>
+                    </button>
+                    <div class="flex-1 flex flex-col gap-1">
+                      <div class="relative h-2 rounded-full cursor-pointer"
+                           [ngClass]="isCurrentUser(msg.senderId) ? 'bg-white/20' : 'theme-bg-avatar'"
+                           (click)="seekVoice($event, msg)">
+                        <div class="absolute top-0 left-0 h-full rounded-full transition-all"
+                             [style.width.%]="getVoiceProgress(msg)"
+                             [ngClass]="isCurrentUser(msg.senderId) ? 'bg-white' : 'theme-text-secondary'"></div>
+                      </div>
+                      <div class="flex justify-between">
+                        <span class="text-[0.6rem] opacity-60 tabular-nums">{{ playingVoiceId() === msg.id ? formatVoiceTime(voiceProgress()) : '0:00' }}</span>
+                        <span class="text-[0.6rem] opacity-60 tabular-nums">{{ formatVoiceTime(voiceDuration()) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                } @else if (msg.messageType === 'image' && msg.content) {
+                  <div class="rounded-xl overflow-hidden max-w-[280px] cursor-pointer hover:opacity-95 transition-opacity">
+                    <img [src]="msg.content" class="w-full h-auto" alt="Image" loading="lazy" />
+                  </div>
+                } @else if (msg.messageType === 'video' && msg.content) {
+                  <div class="rounded-xl overflow-hidden max-w-[300px]">
+                    <video [src]="msg.content" controls playsinline preload="metadata"
+                           class="w-full h-auto rounded-xl max-h-[300px] object-cover"></video>
+                  </div>
+                } @else if (msg.messageType === 'audio' && msg.content) {
+                  <div class="flex items-center gap-2.5 min-w-[220px] py-1">
+                    <audio [src]="msg.content" controls preload="metadata"
+                           class="w-full h-9 flex-1"
+                           [style]="isCurrentUser(msg.senderId) ? 'filter: invert(1) hue-rotate(180deg) brightness(1.5);' : ''"></audio>
+                  </div>
+                } @else if (msg.messageType === 'file' && msg.content) {
+                  <div class="flex items-center gap-3 p-1">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                         [ngClass]="isCurrentUser(msg.senderId) ? 'bg-white/20' : 'theme-bg'">
+                      <i class="fa-solid fa-file text-[1.1rem]" [ngClass]="isCurrentUser(msg.senderId) ? 'text-white' : 'theme-text-secondary'"></i>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-[0.8rem] font-medium truncate max-w-[150px]">{{ msg.content.split('/').pop() || 'File' }}</div>
+                      <div class="text-[0.65rem] opacity-60">Document</div>
+                    </div>
+                  </div>
                 } @else {
                   <span class="inline">{{ msg.content }}</span>
                 }
               </div>
               <!-- TIMESTAMP + STATUS -->
-              <div class="flex items-center gap-1.5 mt-0.5 px-1" [ngClass]="isCurrentUser(msg.senderId) ? 'justify-end' : 'justify-start'">
+              <div class="flex items-center gap-1 mt-0.5 px-1" [ngClass]="isCurrentUser(msg.senderId) ? 'justify-end' : 'justify-start'">
                 @if (msg.editedAt) {
                   <span class="text-[0.6rem] theme-text-muted italic">edited</span>
                 }
@@ -363,44 +520,116 @@
             </div>
           </div>
         }
+        </div>
         @if (loading()) {
           <div class="text-center py-5 theme-text-muted">
-            <div class="flex gap-1 justify-center p-3 items-center">
-              <div class="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce" style="animation-delay: 0.1s"></div>
-              <div class="w-1.5 h-1.5 rounded-full bg-neutral-500 animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="flex gap-1.5 justify-center p-3 items-center">
+              <div class="w-2 h-2 rounded-full bg-[#7c5cbf] animate-bounce"></div>
+              <div class="w-2 h-2 rounded-full bg-[#7c5cbf] animate-bounce" style="animation-delay: 0.1s"></div>
+              <div class="w-2 h-2 rounded-full bg-[#7c5cbf] animate-bounce" style="animation-delay: 0.2s"></div>
             </div>
           </div>
         }
       </div>
 
-      <div class="px-6 py-4 theme-bg border-t theme-border flex items-center gap-3">
-        <button class="theme-text-secondary hover:theme-text transition-colors" title="Emoji">
-          <i class="fa-regular fa-face-smile text-[1.4rem]"></i>
-        </button>
-        <div class="flex-1 relative">
-           <input class="w-full py-2.5 px-5 rounded-full border theme-border theme-bg-elevated theme-text text-[0.95rem] outline-none placeholder-neutral-500 focus:border-neutral-500 transition-colors" placeholder="Message..."
-                  [ngModel]="newMessage()" (ngModelChange)="onMessageInput($event)"
-                  (keydown.enter)="sendMessage()" />
-        </div>
-        @if (newMessage().trim().length > 0) {
-          <button class="text-[#7c5cbf] font-semibold text-[0.95rem] hover:text-[#6a4aad] transition-colors" (click)="sendMessage()">
-            Send
-          </button>
+      <!-- INPUT BAR -->
+      <div class="input-bar px-4 py-3 theme-bg border-t theme-border relative" style="box-shadow: 0 -1px 8px rgba(0,0,0,0.04);">
+        @if (showEmojiPicker()) {
+          <div class="emoji-picker-container absolute bottom-full left-0 right-0 mb-2 mx-4 theme-bg-elevated rounded-xl border theme-border shadow-2xl p-2 animate-[fadeInUp_0.15s_ease] max-h-[200px] overflow-y-auto" (click)="$event.stopPropagation()">
+            @for (group of emojiGroups; track group.label) {
+              <div class="mb-2">
+                <div class="text-[0.65rem] font-semibold theme-text-muted uppercase tracking-wider mb-1 px-1">{{ group.label }}</div>
+                <div class="flex flex-wrap">
+                  @for (emoji of group.emojis; track emoji) {
+                    <button class="w-8 h-8 flex items-center justify-center rounded-md text-[1.05rem] theme-bg-hover transition-colors cursor-pointer active:scale-90" (click)="insertEmoji(emoji)">{{ emoji }}</button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+        @if (isRecording()) {
+          <div class="flex items-center gap-3 animate-[fadeInUp_0.15s_ease]">
+            <button class="flex items-center justify-center w-10 h-10 rounded-full bg-red-500/15 text-red-500 hover:bg-red-500/25 transition-all active:scale-90" (click)="cancelRecording()" title="Cancel">
+              <i class="fa-solid fa-trash-can text-[1rem]"></i>
+            </button>
+            <div class="flex items-center gap-3 flex-1">
+              <div class="w-3 h-3 rounded-full bg-red-500 recording-dot shadow-sm shadow-red-500/50"></div>
+              <span class="text-[0.9rem] font-semibold text-red-500 tabular-nums min-w-[45px]">{{ formatRecordingTime(recordingTime()) }}</span>
+              <div class="flex items-center gap-[3px] h-7">
+                @for (bar of [1,2,3,4,5,6,7,8,9,10,11,12,13,14]; track bar) {
+                  <div class="w-[3px] rounded-full bg-red-400 voice-wave-bar" [style.animation-delay.ms]="bar * 70" [style.height.px]="4 + (bar % 4) * 4"></div>
+                }
+              </div>
+            </div>
+            <button class="send-btn flex items-center justify-center w-12 h-12 rounded-full bg-[#7c5cbf] text-white" (click)="stopRecording()" title="Send voice">
+              <i class="fa-solid fa-paper-plane text-[1.05rem]"></i>
+            </button>
+          </div>
+        } @else if (previewFile()) {
+          <div class="animate-[fadeInUp_0.15s_ease]">
+            <div class="flex items-center gap-3 mb-2 p-2.5 theme-bg-elevated rounded-xl border theme-border">
+              @if (previewFile()!.type.startsWith('image/')) {
+                <img [src]="previewFile()!.url" class="w-16 h-16 object-cover rounded-lg shadow-sm" />
+              } @else {
+                <div class="w-16 h-16 rounded-lg theme-bg-avatar flex items-center justify-center">
+                  <i class="fa-solid fa-file text-2xl theme-text-secondary"></i>
+                </div>
+              }
+              <div class="flex-1 min-w-0">
+                <div class="text-[0.85rem] font-medium theme-text truncate">{{ previewFile()!.name }}</div>
+                <div class="text-[0.75rem] theme-text-muted">Ready to send</div>
+              </div>
+              <button class="flex items-center justify-center w-8 h-8 rounded-full theme-bg-hover transition-all theme-text-muted active:scale-90" (click)="cancelPreview()">
+                <i class="fa-solid fa-xmark text-[0.9rem]"></i>
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="flex items-center justify-center w-10 h-10 rounded-full theme-text-secondary theme-bg-elevated theme-text transition-all active:scale-90" title="Emoji" (click)="toggleEmojiPicker()">
+                <i class="fa-regular fa-face-smile text-[1.3rem]"></i>
+              </button>
+              <div class="flex-1 relative">
+                <input class="input-glow w-full py-2.5 px-5 rounded-full theme-bg-elevated theme-text text-[0.95rem] outline-none placeholder-neutral-500 border theme-border transition-colors" placeholder="Add a caption..." [ngModel]="newMessage()" (ngModelChange)="newMessage.set($event)" (keydown.enter)="sendMessage()" />
+              </div>
+              <button class="send-btn flex items-center justify-center w-11 h-11 rounded-full bg-[#7c5cbf] text-white" (click)="sendPreviewFile()">
+                <i class="fa-solid fa-paper-plane text-[1rem]"></i>
+              </button>
+            </div>
+          </div>
         } @else {
-          <button class="theme-text-secondary hover:theme-text transition-colors" title="Attach file">
-            <i class="fa-solid fa-image text-[1.4rem]"></i>
-          </button>
+          <div class="flex items-center gap-2">
+            <button class="flex items-center justify-center w-10 h-10 rounded-full theme-text-secondary theme-bg-elevated theme-text transition-all active:scale-90" title="Emoji" (click)="toggleEmojiPicker()">
+              <i class="fa-regular fa-face-smile text-[1.3rem]"></i>
+            </button>
+            <button class="flex items-center justify-center w-10 h-10 rounded-full theme-text-secondary theme-bg-elevated theme-text transition-all active:scale-90" title="Attach" (click)="fileInput.click()">
+              <i class="fa-solid fa-paperclip text-[1.3rem]"></i>
+            </button>
+            <input type="file" #fileInput class="hidden" accept="image/*,.pdf,.doc,.docx,.xlsx,.txt,.zip" (change)="previewAttachment($event); fileInput.value=''" />
+            <div class="flex-1 relative">
+              <input class="input-glow w-full py-2.5 px-5 rounded-full theme-bg-elevated theme-text text-[0.95rem] outline-none placeholder-neutral-500 border theme-border transition-colors" placeholder="Message..."
+                     [ngModel]="newMessage()" (ngModelChange)="onMessageInput($event)"
+                     (keydown.enter)="sendMessage()" />
+            </div>
+            @if (newMessage().trim().length > 0) {
+              <button class="send-btn flex items-center justify-center w-11 h-11 rounded-full bg-[#7c5cbf] text-white" (click)="sendMessage()">
+                <i class="fa-solid fa-paper-plane text-[1rem]"></i>
+              </button>
+            } @else {
+              <button class="flex items-center justify-center w-11 h-11 rounded-full theme-text-secondary theme-bg-elevated theme-text transition-all active:scale-90" title="Voice message" (click)="toggleRecording()">
+                <i class="fa-solid fa-microphone text-[1.2rem]"></i>
+              </button>
+            }
+          </div>
         }
       </div>
     } @else {
       <div class="flex-1 flex flex-col items-center justify-center gap-4 theme-text-muted">
-        <div class="w-24 h-24 rounded-full border-2 theme-border flex items-center justify-center">
-          <i class="fa-regular fa-paper-plane text-[2.5rem]"></i>
+        <div class="w-28 h-28 rounded-full flex items-center justify-center mb-2" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(37, 99, 235, 0.08)); border: 2px solid rgba(59, 130, 246, 0.2);">
+          <i class="fa-regular fa-paper-plane text-[3rem]" style="color: var(--accent); opacity: 0.7;"></i>
         </div>
-        <h2 class="text-[1.3rem] theme-text-secondary font-medium">Your Messages</h2>
-        <p class="text-[0.9rem] theme-text-muted">Send private photos and messages to a friend or group.</p>
-        <button class="mt-2 px-4 py-1.5 bg-[#7c5cbf] text-white rounded-lg font-medium text-[0.9rem] hover:bg-[#6a4aad] transition-colors">Send message</button>
+        <h2 class="text-[1.4rem] theme-text-secondary font-semibold tracking-tight">Your Messages</h2>
+        <p class="text-[0.9rem] theme-text-muted text-center max-w-[300px]">Send private photos and messages to a friend or group.</p>
+        <button class="mt-2 px-5 py-2.5 rounded-xl font-medium text-[0.9rem] transition-all active:scale-95" style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; box-shadow: 0 8px 22px rgba(37, 99, 235, 0.35);" (click)="openNewChatModal()">Send message</button>
       </div>
     }
   </main>
@@ -409,24 +638,24 @@
 <!-- CONTEXT MENU -->
 @if (showContextMenu()) {
   <div class="fixed inset-0 z-[60]" (click)="closeContextMenu()"></div>
-  <div class="context-menu fixed z-[61] theme-bg-elevated rounded-xl shadow-2xl border theme-border py-1.5 min-w-[180px] animate-[fadeInUp_0.12s_ease]"
+  <div class="context-menu fixed z-[61] theme-bg-elevated rounded-xl border theme-border py-1.5 min-w-[180px] animate-[fadeInUp_0.12s_ease]"
        [style.left.px]="contextMenuX()" [style.top.px]="contextMenuY()">
     @if (contextMenuMessage(); as msg) {
-      <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text hover:theme-bg-hover transition-colors text-left" (click)="replyToMessage()">
+      <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text theme-bg-hover transition-colors text-left active:scale-[0.97]" (click)="replyToMessage()">
         <i class="fa-solid fa-reply w-5 text-center theme-text-secondary"></i>
         <span>Reply</span>
       </button>
-      <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text hover:theme-bg-hover transition-colors text-left" (click)="copyMessage()">
+      <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text theme-bg-hover transition-colors text-left active:scale-[0.97]" (click)="copyMessage()">
         <i class="fa-regular fa-copy w-5 text-center theme-text-secondary"></i>
         <span>Copy</span>
       </button>
       @if (isCurrentUser(msg.senderId) && !msg.isDeleted) {
-        <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text hover:theme-bg-hover transition-colors text-left" (click)="editMessageAction()">
+        <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] theme-text theme-bg-hover transition-colors text-left active:scale-[0.97]" (click)="editMessageAction()">
           <i class="fa-regular fa-pen-to-square w-5 text-center theme-text-secondary"></i>
           <span>Edit</span>
         </button>
         <div class="mx-3 my-1 border-t theme-border"></div>
-        <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] text-red-500 hover:theme-bg-hover transition-colors text-left" (click)="deleteMessageAction()">
+        <button class="context-menu-item w-full flex items-center gap-3 px-4 py-2.5 text-[0.85rem] text-red-500 theme-bg-hover transition-colors text-left active:scale-[0.97]" (click)="deleteMessageAction()">
           <i class="fa-regular fa-trash-can w-5 text-center"></i>
           <span>Delete</span>
         </button>
@@ -437,18 +666,20 @@
 
 <!-- USER INFO OVERLAY -->
 @if (showUserInfo()) {
-  <div class="fixed inset-0 theme-bg/60 z-50 flex items-center justify-center p-4" (click)="closeUserInfo()">
-    <div class="theme-bg-elevated rounded-xl w-full max-w-[400px] flex flex-col overflow-hidden" (click)="$event.stopPropagation()">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="background: rgba(0,0,0,0.6);" (click)="closeUserInfo()">
+    <div class="theme-bg-elevated rounded-2xl w-full max-w-[400px] modal-mobile-fullscreen flex flex-col overflow-hidden shadow-2xl animate-[fadeInUp_0.2s_ease]" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between px-5 py-4 border-b theme-border">
         <div class="w-6"></div>
         <h2 class="text-[1.1rem] font-semibold theme-text">Details</h2>
-        <button class="theme-text-secondary hover:theme-text" (click)="closeUserInfo()">
+        <button class="theme-text-secondary theme-text transition-colors active:scale-90" (click)="closeUserInfo()">
           <i class="fa-solid fa-xmark text-[1.2rem]"></i>
         </button>
       </div>
       @if (userInfoUser(); as user) {
         <div class="p-6 flex flex-col items-center">
-          <div class="w-24 h-24 rounded-full theme-bg-avatar font-semibold text-2xl theme-text flex items-center justify-center mb-4">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
+          <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px] mb-4">
+            <div class="w-full h-full theme-bg rounded-full font-semibold text-2xl theme-text flex items-center justify-center">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
+          </div>
           <div class="text-xl font-semibold theme-text">{{ user.firstName }} {{ user.lastName }}</div>
           <div class="theme-text-muted mt-1 mb-6">{{ '@' + user.username }}</div>
           <div class="w-full flex flex-col gap-4">
@@ -461,7 +692,7 @@
               <div class="theme-text">{{ user.email }}</div>
             </div>
           </div>
-          <button class="mt-8 w-full py-2.5 rounded-lg theme-bg-avatar hover:theme-bg-avatar theme-text font-semibold transition-colors" (click)="closeUserInfo(); startNewChat(user.id)">
+          <button class="mt-8 w-full py-2.5 rounded-xl bg-[#7c5cbf] text-white hover:bg-[#6a4aad] font-semibold transition-all shadow-md shadow-[#7c5cbf]/25 active:scale-[0.97]" (click)="closeUserInfo(); startNewChat(user.id)">
             Message
           </button>
         </div>
@@ -472,42 +703,412 @@
 
 <!-- NEW CHAT MODAL -->
 @if (showNewChatModal()) {
-  <div class="fixed inset-0 theme-bg/60 z-50 flex items-center justify-center p-4" (click)="closeNewChatModal()">
-    <div class="theme-bg-elevated rounded-xl w-full max-w-[400px] flex flex-col overflow-hidden h-[80vh] md:h-auto md:max-h-[80vh]" (click)="$event.stopPropagation()">
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="background: rgba(0,0,0,0.6);" (click)="closeNewChatModal()">
+    <div class="theme-bg-elevated rounded-2xl w-full max-w-[400px] flex flex-col overflow-hidden h-[80vh] md:h-auto md:max-h-[80vh] modal-mobile-fullscreen shadow-2xl animate-[fadeInUp_0.2s_ease]" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between px-5 py-4 border-b theme-border">
-        <div class="w-6"></div>
+        <div class="w-8"></div>
         <h2 class="text-[1.1rem] font-semibold theme-text">New message</h2>
-        <button class="theme-text-secondary hover:theme-text" (click)="closeNewChatModal()">
-          <i class="fa-solid fa-xmark text-[1.2rem]"></i>
+        <button class="w-8 h-8 rounded-full flex items-center justify-center theme-text-secondary theme-bg-hover transition-all active:scale-90" (click)="closeNewChatModal()">
+          <i class="fa-solid fa-xmark text-[1.1rem]"></i>
         </button>
       </div>
-      <div class="p-4 border-b theme-border flex items-center gap-3">
-        <span class="theme-text font-semibold text-[0.95rem]">To:</span>
-        <input class="flex-1 bg-transparent theme-text text-[0.95rem] outline-none placeholder-neutral-500" placeholder="Search..."
-               [ngModel]="userSearchQuery()"
-               (ngModelChange)="filterUsers($event)"
-               autofocus />
+      <div class="px-4 py-3 border-b theme-border flex items-center gap-3">
+        <span class="theme-text-secondary text-[0.85rem] font-medium">To:</span>
+        <div class="flex-1 flex items-center gap-2 theme-bg rounded-lg px-3 py-2 border theme-border focus-within:border-blue-500/50 transition-colors">
+          <i class="fa-solid fa-magnifying-glass text-[0.8rem] theme-text-muted"></i>
+          <input class="flex-1 bg-transparent theme-text text-[0.9rem] outline-none placeholder-theme-muted" placeholder="Search people..."
+                 [ngModel]="userSearchQuery()"
+                 (ngModelChange)="filterUsers($event)" #newChatInput />
+          @if (userSearchQuery()) {
+            <button class="text-theme-muted hover:text-theme transition-colors" (click)="filterUsers('')">
+              <i class="fa-solid fa-xmark text-[0.75rem]"></i>
+            </button>
+          }
+        </div>
       </div>
       <div class="flex-1 overflow-y-auto">
         @if (loadingUsers()) {
-          <div class="flex flex-col items-center justify-center py-10 theme-text-muted">
-            <div class="w-5 h-5 border-2 theme-border border-t-[var(--text-primary)] rounded-full animate-spin"></div>
+          <div class="flex flex-col items-center justify-center py-12 theme-text-muted gap-3">
+            <div class="w-6 h-6 border-2 theme-border border-t-blue-500 rounded-full animate-spin"></div>
+            <span class="text-[0.8rem]">Loading contacts...</span>
           </div>
         } @else {
           @for (user of availableUsers(); track user.id) {
-            <div class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:theme-bg-avatar transition-colors group" (click)="startNewChat(user.id)">
-              <div class="w-12 h-12 rounded-full theme-bg-avatar flex items-center justify-center font-semibold theme-text">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
-              <div class="flex-1">
-                <div class="font-semibold theme-text text-[0.95rem]">{{ user.firstName }} {{ user.lastName }}</div>
-                <div class="text-[0.8rem] theme-text-muted">{{ user.phoneNumber }}</div>
+            <div class="flex items-center gap-3 px-5 py-3.5 cursor-pointer theme-bg-hover transition-all active:scale-[0.98] group border-b theme-border/50 last:border-b-0" (click)="startNewChat(user.id)">
+              <div class="relative">
+                <div class="w-11 h-11 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[2px]">
+                  <div class="w-full h-full theme-bg rounded-full flex items-center justify-center font-semibold text-[0.8rem] theme-text">{{ getInitials(user.firstName + ' ' + user.lastName) }}</div>
+                </div>
               </div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold theme-text text-[0.9rem] truncate">{{ user.firstName }} {{ user.lastName }}</div>
+                <div class="text-[0.75rem] theme-text-secondary truncate">{{ user.phoneNumber }}</div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-[0.65rem] theme-text-muted opacity-0 group-hover:opacity-100 transition-opacity"></i>
             </div>
           } @empty {
-            <div class="flex flex-col items-center justify-center py-10 theme-text-muted gap-3">
-              <p>No account found.</p>
+            <div class="flex flex-col items-center justify-center py-12 theme-text-muted gap-3">
+              <div class="w-14 h-14 rounded-full theme-bg flex items-center justify-center">
+                <i class="fa-solid fa-user-slash text-xl theme-text-muted opacity-40"></i>
+              </div>
+              <p class="text-[0.85rem] font-medium">No contacts found</p>
+              <p class="text-[0.75rem] theme-text-secondary">Try a different search term</p>
             </div>
           }
         }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ERROR TOAST -->
+@if (errorMessage()) {
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-[fadeInUp_0.2s_ease]">
+    <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-red-500 text-white shadow-2xl shadow-red-500/30 text-[0.9rem] font-medium">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ errorMessage() }}</span>
+      <button class="ml-2 opacity-70 hover:opacity-100 transition-opacity" (click)="errorMessage.set('')">
+        <i class="fa-solid fa-xmark text-[0.85rem]"></i>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- SUCCESS TOAST -->
+@if (successMessage()) {
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-[fadeInUp_0.2s_ease]">
+    <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-green-500 text-white shadow-2xl shadow-green-500/30 text-[0.9rem] font-medium">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>{{ successMessage() }}</span>
+      <button class="ml-2 opacity-70 hover:opacity-100 transition-opacity" (click)="successMessage.set('')">
+        <i class="fa-solid fa-xmark text-[0.85rem]"></i>
+      </button>
+    </div>
+  </div>
+}
+
+<!-- STATUS MODAL -->
+@if (showStatusModal()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop" style="background: rgba(0,0,0,0.6);" (click)="closeStatusModal()">
+    <div class="theme-bg-elevated rounded-2xl w-full max-w-[400px] flex flex-col overflow-hidden modal-mobile-fullscreen shadow-2xl animate-[fadeInUp_0.2s_ease]" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between px-5 py-4 border-b theme-border">
+        <div class="w-6"></div>
+        <h2 class="text-[1.1rem] font-semibold theme-text">New Status</h2>
+        <button class="theme-text-secondary theme-text transition-colors active:scale-90" (click)="closeStatusModal()">
+          <i class="fa-solid fa-xmark text-[1.2rem]"></i>
+        </button>
+      </div>
+      <div class="p-5">
+        <textarea class="input-glow w-full py-3 px-4 rounded-xl theme-bg-elevated theme-text text-[0.9rem] outline-none border theme-border resize-none h-24" placeholder="What's on your mind?" [ngModel]="statusText()" (ngModelChange)="statusText.set($event)"></textarea>
+        @if (statusPreview()) {
+          <div class="mt-3 relative">
+            <img [src]="statusPreview()!.url" class="w-full h-40 object-cover rounded-xl" />
+            <button class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center" (click)="statusPreview.set(null)">
+              <i class="fa-solid fa-xmark text-[0.8rem]"></i>
+            </button>
+          </div>
+        }
+        <div class="flex items-center gap-3 mt-4">
+          <label class="flex items-center gap-2 px-4 py-2 rounded-xl theme-bg cursor-pointer transition-all theme-text-secondary theme-text active:scale-95 border theme-border">
+            <i class="fa-solid fa-image text-[1rem]"></i>
+            <span class="text-[0.85rem] font-medium">Photo</span>
+            <input type="file" class="hidden" accept="image/*" (change)="previewStatusImage($event)" />
+          </label>
+          <button class="flex-1 py-2.5 rounded-xl bg-[#7c5cbf] text-white font-semibold text-[0.9rem] transition-all hover:bg-[#6a4aad] active:scale-[0.97] shadow-md shadow-[#7c5cbf]/25" (click)="postStatus()">
+            Post Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- INCOMING CALL OVERLAY (Premium Style) -->
+@if (showIncomingCall() && incomingCall()) {
+  <div class="fixed inset-0 z-[90] flex flex-col items-center justify-between call-screen-premium" style="background: linear-gradient(160deg, #0f0524 0%, #150d35 30%, #0a0a1f 60%, #050518 100%);">
+
+    <!-- Animated background orbs -->
+    <div class="call-orb call-orb-1"></div>
+    <div class="call-orb call-orb-2"></div>
+    <div class="call-orb call-orb-3"></div>
+
+    <!-- Top: caller info -->
+    <div class="flex flex-col items-center gap-5 pt-20 z-10">
+      <div class="text-[0.75rem] text-white/40 tracking-[0.25em] uppercase font-semibold">
+        {{ incomingCall()!.callType === 'video' ? '📹 Incoming Video Call' : '📞 Incoming Voice Call' }}
+      </div>
+
+      <!-- Avatar with triple pulse rings -->
+      <div class="relative flex items-center justify-center">
+        <div class="call-ring-outer absolute w-48 h-48 rounded-full"></div>
+        <div class="call-ring-mid absolute w-40 h-40 rounded-full"></div>
+        <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[3px] shadow-2xl relative z-10">
+          <div class="w-full h-full rounded-full flex items-center justify-center text-[2.2rem] font-bold text-white" style="background: #1a0d35;">
+            {{ getInitials(incomingCall()!.callerName) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <div class="text-[2rem] font-bold text-white tracking-tight leading-tight">{{ incomingCall()!.callerName }}</div>
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+          <span class="text-[0.85rem] text-white/50">{{ incomingCall()!.callType === 'video' ? 'Video' : 'Voice' }} Call</span>
+        </div>
+      </div>
+
+      <!-- Audio wave indicator -->
+      <div class="flex items-end gap-1 h-8 mt-1">
+        @for (bar of [1,2,3,4,5,6,7]; track bar) {
+          <div class="incoming-wave-bar w-1.5 rounded-full bg-gradient-to-t from-purple-600 to-pink-400" [style.animation-delay]="(bar * 0.1) + 's'"></div>
+        }
+      </div>
+    </div>
+
+    <!-- Bottom: Action Buttons -->
+    <div class="flex items-center gap-20 pb-20 z-10">
+      <!-- Decline -->
+      <div class="flex flex-col items-center gap-3">
+        <button class="incoming-action-btn decline-btn w-[70px] h-[70px] rounded-full flex items-center justify-center shadow-2xl" (click)="declineIncomingCall()">
+          <i class="fa-solid fa-phone-slash text-[1.4rem] text-white"></i>
+        </button>
+        <span class="text-[0.8rem] text-white/50 font-medium tracking-wide">Decline</span>
+      </div>
+
+      <!-- Message (coming soon) -->
+      <div class="flex flex-col items-center gap-3">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);">
+          <i class="fa-solid fa-comment text-white/40 text-[1rem]"></i>
+        </div>
+        <span class="text-[0.7rem] text-white/30 font-medium">Message</span>
+      </div>
+
+      <!-- Accept -->
+      <div class="flex flex-col items-center gap-3">
+        <button class="incoming-action-btn accept-btn w-[70px] h-[70px] rounded-full flex items-center justify-center shadow-2xl" (click)="acceptIncomingCall()">
+          <i class="fa-solid fa-phone text-[1.4rem] text-white"></i>
+        </button>
+        <span class="text-[0.8rem] text-white/50 font-medium tracking-wide">Accept</span>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- OUTGOING/ACTIVE CALL MODAL (Premium) -->
+@if (showCallModal()) {
+  <div class="fixed inset-0 z-[80] flex flex-col call-screen-premium" style="background: linear-gradient(160deg, #0f0524 0%, #150d35 30%, #0a0a1f 60%, #050518 100%);">
+
+    <!-- Animated background orbs -->
+    <div class="call-orb call-orb-1"></div>
+    <div class="call-orb call-orb-2"></div>
+    <div class="call-orb call-orb-3"></div>
+
+    <!-- ALWAYS-PRESENT media elements (hidden until needed) -->
+    <!-- remoteAudio: always in DOM so attachRemoteStream() can find it immediately -->
+    <audio id="remoteAudio" autoplay playsinline style="display:none;"></audio>
+
+    <!-- Video streams: always in DOM for video calls, hidden for voice -->
+    <div class="absolute inset-0" [style.display]="callType() === 'video' ? 'block' : 'none'">
+      <video id="remoteVideo" autoplay playsinline
+             [style.display]="callState() === 'connected' ? 'block' : 'none'"
+             class="w-full h-full object-cover opacity-90"></video>
+      <div class="absolute inset-0 pointer-events-none"
+           [style.display]="callState() === 'connected' ? 'block' : 'none'"
+           style="background: linear-gradient(to bottom, rgba(10,5,30,0.5) 0%, transparent 30%, transparent 60%, rgba(10,5,30,0.85) 100%);"></div>
+      <video id="localVideo" autoplay playsinline muted
+             class="absolute bottom-36 right-4 w-[110px] h-[150px] rounded-2xl border border-white/20 object-cover shadow-2xl z-10"></video>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="relative z-10 flex items-center justify-between px-6 pt-14 pb-2">
+      <!-- Call quality indicator -->
+      @if (callState() === 'connected') {
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style="background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);">
+          <div class="flex items-end gap-[2px] h-3.5">
+            <div class="w-1 rounded-sm" [ngClass]="callQuality() !== 'poor' ? 'bg-green-400' : 'bg-white/30'" style="height: 35%;"></div>
+            <div class="w-1 rounded-sm" [ngClass]="callQuality() !== 'poor' ? 'bg-green-400' : 'bg-white/30'" style="height: 60%;"></div>
+            <div class="w-1 rounded-sm" [ngClass]="callQuality() === 'excellent' ? 'bg-green-400' : 'bg-white/30'" style="height: 100%;"></div>
+          </div>
+          <span class="text-[0.7rem] text-white/60 font-medium capitalize">{{ callQuality() }}</span>
+        </div>
+      } @else {
+        <div></div>
+      }
+      <!-- Encryption badge -->
+      <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full" style="background: rgba(255,255,255,0.06); backdrop-filter: blur(10px);">
+        <i class="fa-solid fa-lock text-[0.65rem] text-green-400"></i>
+        <span class="text-[0.65rem] text-white/50">End-to-end encrypted</span>
+      </div>
+    </div>
+
+    <!-- CENTER: Avatar + Info -->
+    <div class="flex-1 flex flex-col items-center justify-center gap-5 z-10 px-6">
+
+      @if (callType() !== 'video' || callState() !== 'connected') {
+        <!-- Avatar with animated rings when calling -->
+        <div class="relative flex items-center justify-center">
+          @if (callState() === 'outgoing' || callState() === 'ringing') {
+            <div class="call-ring-outer absolute w-52 h-52 rounded-full"></div>
+            <div class="call-ring-mid absolute w-42 h-42 rounded-full"></div>
+          }
+          <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[3px] shadow-2xl relative z-10"
+               [class.call-avatar-connected]="callState() === 'connected'">
+            <div class="w-full h-full rounded-full flex items-center justify-center text-[2.2rem] font-bold text-white" style="background: #1a0d35;">
+              {{ getInitials(callTarget()) }}
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Name + Status -->
+      <div class="text-center">
+        <div class="text-[1.9rem] font-bold text-white tracking-tight">{{ callTarget() }}</div>
+        <div class="mt-2">
+          @if (callState() === 'outgoing') {
+            <div class="flex items-center justify-center gap-2">
+              <div class="flex gap-1">
+                <div class="w-1.5 h-1.5 rounded-full bg-yellow-400" style="animation: dotBounce 1.2s ease-in-out infinite; animation-delay: 0s;"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-yellow-400" style="animation: dotBounce 1.2s ease-in-out infinite; animation-delay: 0.2s;"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-yellow-400" style="animation: dotBounce 1.2s ease-in-out infinite; animation-delay: 0.4s;"></div>
+              </div>
+              <span class="text-[1rem] text-yellow-400 font-medium">Calling...</span>
+            </div>
+          } @else if (callState() === 'ringing') {
+            <span class="text-[1rem] text-blue-400 font-medium">Connecting...</span>
+          } @else if (callState() === 'connected') {
+            <div class="flex flex-col items-center gap-1.5">
+              <span class="text-[1.5rem] text-green-400 font-mono font-bold tracking-wider">{{ formatCallDuration(callDuration()) }}</span>
+              <!-- Live audio wave -->
+              <div class="flex items-end gap-1 h-6">
+                @for (bar of [1,2,3,4,5,6,7,8]; track bar) {
+                  <div class="active-wave-bar rounded-full" [class.muted-bar]="isMuted()" [style.animation-delay]="(bar * 0.08) + 's'"></div>
+                }
+              </div>
+            </div>
+          } @else if (callState() === 'no-answer') {
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-phone-missed text-red-400"></i>
+              <span class="text-[1rem] text-red-400 font-medium">No answer</span>
+            </div>
+          } @else if (callState() === 'declined') {
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-phone-slash text-red-400"></i>
+              <span class="text-[1rem] text-red-400 font-medium">Call declined</span>
+            </div>
+          } @else {
+            <span class="text-[1rem] text-white/30">Call ended</span>
+          }
+        </div>
+        <div class="text-[0.75rem] text-white/30 mt-2 tracking-widest uppercase">
+          {{ callType() === 'video' ? '📹 Video Call' : '🔊 Voice Call' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="relative z-10 pb-12 px-6">
+      <!-- Control pills row -->
+      @if (callState() === 'connected') {
+        <div class="flex items-center justify-center gap-5 mb-8">
+
+          <!-- Mute -->
+          <div class="flex flex-col items-center gap-2">
+            <button class="call-control-pill w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all active:scale-90"
+                    [ngClass]="isMuted() ? 'active-pill-red' : 'inactive-pill'"
+                    (click)="toggleMute()" title="Mute">
+              <i class="text-[1.2rem] text-white fa-solid" [ngClass]="isMuted() ? 'fa-microphone-slash' : 'fa-microphone'"></i>
+            </button>
+            <span class="text-[0.68rem] text-white/40 font-medium">{{ isMuted() ? 'Unmute' : 'Mute' }}</span>
+          </div>
+
+          <!-- Speaker -->
+          <div class="flex flex-col items-center gap-2">
+            <button class="call-control-pill w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all active:scale-90"
+                    [ngClass]="isSpeakerOn() ? 'active-pill-blue' : 'inactive-pill'"
+                    (click)="toggleSpeaker()" title="Speaker">
+              <i class="text-[1.2rem] text-white fa-solid" [ngClass]="isSpeakerOn() ? 'fa-volume-high' : 'fa-volume-xmark'"></i>
+            </button>
+            <span class="text-[0.68rem] text-white/40 font-medium">Speaker</span>
+          </div>
+
+          @if (callType() === 'video') {
+            <!-- Camera -->
+            <div class="flex flex-col items-center gap-2">
+              <button class="call-control-pill w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all active:scale-90"
+                      [ngClass]="isCameraOff() ? 'active-pill-red' : 'inactive-pill'"
+                      (click)="toggleCamera()" title="Camera">
+                <i class="text-[1.2rem] text-white fa-solid" [ngClass]="isCameraOff() ? 'fa-video-slash' : 'fa-video'"></i>
+              </button>
+              <span class="text-[0.68rem] text-white/40 font-medium">{{ isCameraOff() ? 'Camera off' : 'Camera' }}</span>
+            </div>
+          }
+
+          <!-- Keypad placeholder -->
+          <div class="flex flex-col items-center gap-2">
+            <button class="call-control-pill inactive-pill w-[60px] h-[60px] rounded-2xl flex items-center justify-center transition-all active:scale-90" title="Keypad">
+              <i class="fa-solid fa-grip text-[1.2rem] text-white/60"></i>
+            </button>
+            <span class="text-[0.68rem] text-white/40 font-medium">Keypad</span>
+          </div>
+        </div>
+      }
+
+      <!-- End call button -->
+      <div class="flex justify-center">
+        <button class="call-end-premium flex items-center gap-3 px-8 py-4 rounded-full shadow-2xl transition-all active:scale-95 hover:shadow-red-500/40" (click)="endCall()">
+          <i class="fa-solid fa-phone-slash text-[1.2rem] text-white"></i>
+          <span class="text-white font-semibold text-[0.95rem]">End Call</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- CREATE GROUP MODAL -->
+@if (showCreateGroupModal()) {
+  <div class="fixed inset-0 z-[90] flex items-center justify-center bg-black/60 backdrop-blur-sm" (click)="closeCreateGroupModal()">
+    <div class="w-full max-w-md mx-4 rounded-2xl shadow-2xl theme-bg border theme-border" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between px-5 py-4 border-b theme-border">
+        <h3 class="text-lg font-bold theme-text">Create Group</h3>
+        <button class="w-8 h-8 rounded-full flex items-center justify-center theme-bg-elevated theme-text-secondary cursor-pointer transition-all hover:theme-text active:scale-90" (click)="closeCreateGroupModal()">
+          <i class="fa-solid fa-xmark text-[1rem]"></i>
+        </button>
+      </div>
+      <div class="p-5">
+        <div class="mb-4">
+          <label class="block text-[0.85rem] font-medium theme-text mb-2">Group Name</label>
+          <input class="w-full py-2.5 px-3 rounded-lg border text-[0.9rem] outline-none transition-colors theme-border theme-bg-input theme-text" placeholder="Enter group name" [ngModel]="newGroupName()" (ngModelChange)="newGroupName.set($event)" />
+        </div>
+        <div class="mb-4">
+          <label class="block text-[0.85rem] font-medium theme-text mb-2">Select Members</label>
+          <div class="max-h-48 overflow-y-auto border rounded-lg theme-border">
+            @for (user of allUsers(); track user.id) {
+              <div class="flex items-center gap-3 px-3 py-2.5 cursor-pointer transition-all theme-bg-hover" [class.bg-accent-soft]="selectedGroupMembers().includes(user.id)" (click)="toggleGroupMember(user.id)">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-500 via-pink-500 to-purple-600 p-[1px]">
+                  <div class="w-full h-full theme-bg rounded-full flex items-center justify-center text-[0.65rem] font-bold text-white">
+                    {{ getInitials(user.fullName) }}
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-[0.85rem] font-medium theme-text truncate">{{ user.fullName }}</div>
+                  <div class="text-[0.75rem] theme-text-secondary truncate">{{ user.email }}</div>
+                </div>
+                @if (selectedGroupMembers().includes(user.id)) {
+                  <i class="fa-solid fa-check text-[0.8rem] text-green-500"></i>
+                }
+              </div>
+            }
+          </div>
+          <div class="text-[0.75rem] theme-text-secondary mt-2">{{ selectedGroupMembers().length }} members selected</div>
+        </div>
+        <div class="flex gap-3">
+          <button class="flex-1 py-2.5 rounded-lg border-none cursor-pointer theme-text font-medium text-[0.9rem] transition-all hover:opacity-90 disabled:opacity-50 active:scale-[0.98]" style="background: var(--accent);" (click)="createGroupChat()" [disabled]="!newGroupName().trim() || selectedGroupMembers().length === 0">
+            Create Group
+          </button>
+          <button class="flex-1 py-2.5 rounded-lg border cursor-pointer bg-transparent font-medium text-[0.9rem] transition-colors theme-border theme-text-secondary" (click)="closeCreateGroupModal()">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </div>

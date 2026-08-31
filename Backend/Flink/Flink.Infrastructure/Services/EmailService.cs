@@ -19,6 +19,7 @@ namespace Flink.Infrastructure.Services
 
         public async Task SendEmailAsync(string toEmail, string subject, string body)
         {
+            Console.WriteLine($"[EMAIL] Sending to: {toEmail} | Subject: {subject}");
             var email = new MimeMessage();
             email.From.Add(MailboxAddress.Parse(_config["EmailSettings:SenderEmail"]));
             email.To.Add(MailboxAddress.Parse(toEmail));
@@ -30,6 +31,7 @@ namespace Flink.Infrastructure.Services
             await smtp.AuthenticateAsync(_config["EmailSettings:SenderEmail"], _config["EmailSettings:SenderPassword"]);
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
+            Console.WriteLine($"[EMAIL] Sent successfully to: {toEmail}");
         }
     }
 }

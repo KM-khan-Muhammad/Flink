@@ -17,6 +17,7 @@ namespace Flink.Application.Interfaces
         Task<List<UserDto>> SearchUsersAsync(string query, int excludeUserId);
         Task<List<UserDto>> GetAllUsersAsync(int excludeUserId);
         Task<UserDto?> GetUserByIdAsync(int userId);
+        Task<List<UserDto>> GetWhatsAppRecipientsAsync(int chatId, int senderId);
         Task<bool> IsUserInChatAsync(int userId, int chatId);
         Task<int> GetUnreadCountAsync(int chatId, int userId);
         Task<MessageDto?> GetMessageByIdAsync(int messageId);
@@ -26,5 +27,6 @@ namespace Flink.Application.Interfaces
         Task<bool> IsUserOnlineAsync(int userId);
         Task UpdateTypingStatusAsync(int chatId, int userId);
         Task<DateTime?> GetOtherUserTypingAsync(int chatId, int userId);
+        Task<List<int>> GetChatIdsForUserAsync(int userId);
     }
 }

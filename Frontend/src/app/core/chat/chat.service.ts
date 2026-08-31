@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UserDto {
   id: number;
@@ -53,11 +54,36 @@ export interface EditMessageRequest {
   content: string;
 }
 
+export interface CallDto {
+  id: number;
+  chatId: number;
+  callerId: number;
+  callerName: string;
+  receiverId: number;
+  receiverName: string;
+  callType: string;
+  status: string;
+  startedAt: string;
+  answeredAt?: string;
+  endedAt?: string;
+}
+
+export interface StatusDto {
+  id: number;
+  userId: number;
+  userName: string;
+  text?: string;
+  imageUrl?: string;
+  createdAt: string;
+  expiresAt: string;
+  isOwn: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = 'https://localhost:7030/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -119,5 +145,53 @@ export class ChatService {
 
   getUserInfo(userId: number): Observable<UserDto> {
     return this.http.get<UserDto>(`${this.apiUrl}/chat/users/${userId}`);
+  }
+
+  initiateCall(chatId: number, callType: string): Observable<CallDto> {
+    return this.http.post<CallDto>(`${this.apiUrl}/call/initiate`, { chatId, callType });
+  }
+
+  acceptCall(callId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/call/${callId}/accept`, {});
+  }
+
+  declineCall(callId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/call/${callId}/decline`, {});
+  }
+
+  endCall(callId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/call/${callId}/end`, {});
+  }
+
+  getIncomingCall(): Observable<CallDto | null> {
+    return this.http.get<CallDto | null>(`${this.apiUrl}/call/incoming`);
+  }
+
+  getActiveCall(): Observable<CallDto | null> {
+    return this.http.get<CallDto | null>(`${this.apiUrl}/call/active`);
+  }
+
+  getCallHistory(limit: number = 50): Observable<CallDto[]> {
+    return this.http.get<CallDto[]>(`${this.apiUrl}/call/history?limit=${limit}`);
+  }
+
+  createGroupChat(name: string, memberIds: number[]): Observable<ChatDto> {
+    return this.http.post<ChatDto>(`${this.apiUrl}/chat/create-group`, { name, memberIds });
+  }
+
+  uploadFile(formData: FormData): Observable<{ success: boolean; fileUrl: string; fileName: string; contentType: string; fileSize: number; category: string }> {
+    return this.http.post<{ success: boolean; fileUrl: string; fileName: string; contentType: string; fileSize: number; category: string }>(`${this.apiUrl.replace('/api', '')}/api/upload`, formData);
+  }
+
+  getStatuses(): Observable<StatusDto[]> {
+    return this.http.get<StatusDto[]>(`${this.apiUrl}/status`);
+  }
+
+  createStatus(text?: string, imageUrl?: string): Observable<StatusDto> {
+    return this.http.post<StatusDto>(`${this.apiUrl}/status`, { text, imageUrl });
+  }
+
+  deleteStatus(statusId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/status/${statusId}`);
   }
 }

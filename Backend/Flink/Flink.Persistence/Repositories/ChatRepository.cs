@@ -89,32 +89,54 @@ namespace Flink.Persistence.Repositories
         public async Task<int> CreateChatAsync(int userId, int otherUserId)
         {
             using var connection = _connectionFactory.CreateConnection();
-            var sql = @"INSERT INTO Chats (IsGroup, CreatedByUserId, CreatedAt) VALUES (0, @UserId, GETUTCDATE());
-                        SELECT CAST(SCOPE_IDENTITY() as int);";
-            var chatId = await connection.QuerySingleAsync<int>(sql, new { UserId = userId });
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                var sql = @"INSERT INTO Chats (IsGroup, CreatedByUserId, CreatedAt) VALUES (0, @UserId, GETUTCDATE());
+                            SELECT CAST(SCOPE_IDENTITY() as int);";
+                var chatId = await connection.QuerySingleAsync<int>(sql, new { UserId = userId }, transaction);
 
-            await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = userId });
-            await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = otherUserId });
+                await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = userId }, transaction);
+                await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = otherUserId }, transaction);
 
-            return chatId;
+                transaction.Commit();
+                return chatId;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<int> CreateGroupChatAsync(string name, int creatorUserId, List<int> memberIds)
         {
             using var connection = _connectionFactory.CreateConnection();
-            var sql = @"INSERT INTO Chats (Name, IsGroup, CreatedByUserId, CreatedAt) VALUES (@Name, 1, @UserId, GETUTCDATE());
-                        SELECT CAST(SCOPE_IDENTITY() as int);";
-            var chatId = await connection.QuerySingleAsync<int>(sql, new { Name = name, UserId = creatorUserId });
-
-            var allMembers = new List<int> { creatorUserId };
-            allMembers.AddRange(memberIds.Where(m => m != creatorUserId).Distinct());
-
-            foreach (var memberId in allMembers)
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
             {
-                await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = memberId });
-            }
+                var sql = @"INSERT INTO Chats (Name, IsGroup, CreatedByUserId, CreatedAt) VALUES (@Name, 1, @UserId, GETUTCDATE());
+                            SELECT CAST(SCOPE_IDENTITY() as int);";
+                var chatId = await connection.QuerySingleAsync<int>(sql, new { Name = name, UserId = creatorUserId }, transaction);
 
-            return chatId;
+                var allMembers = new List<int> { creatorUserId };
+                allMembers.AddRange(memberIds.Where(m => m != creatorUserId).Distinct());
+
+                foreach (var memberId in allMembers)
+                {
+                    await connection.ExecuteAsync("INSERT INTO ChatMembers (ChatId, UserId, JoinedAt) VALUES (@ChatId, @UserId, GETUTCDATE())", new { ChatId = chatId, UserId = memberId }, transaction);
+                }
+
+                transaction.Commit();
+                return chatId;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
         }
 
         public async Task<List<MessageDto>> GetMessagesAsync(int chatId, int userId, int page = 1, int pageSize = 50)
@@ -203,6 +225,23 @@ namespace Flink.Persistence.Repositories
                         ISNULL(NULLIF(WhatsAppNumber, ''), Username) AS PhoneNumber 
                         FROM Users WHERE Id = @UserId";
             return await connection.QuerySingleOrDefaultAsync<UserDto>(sql, new { UserId = userId });
+        }
+
+        public async Task<List<UserDto>> GetWhatsAppRecipientsAsync(int chatId, int senderId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = @"
+                SELECT u.Id, u.FirstName, u.LastName, u.Email, u.Username,
+                    u.WhatsAppNumber AS PhoneNumber
+                FROM Users u
+                INNER JOIN ChatMembers cm ON cm.UserId = u.Id
+                WHERE cm.ChatId = @ChatId
+                  AND u.Id <> @SenderId
+                  AND u.WhatsAppNumber IS NOT NULL
+                  AND LTRIM(RTRIM(u.WhatsAppNumber)) <> ''";
+
+            var result = await connection.QueryAsync<UserDto>(sql, new { ChatId = chatId, SenderId = senderId });
+            return result.ToList();
         }
 
         public async Task<bool> IsUserInChatAsync(int userId, int chatId)
@@ -298,6 +337,14 @@ namespace Flink.Persistence.Repositories
                 WHERE ts.ChatId = @ChatId AND ts.UserId <> @UserId
                 AND DATEDIFF(SECOND, ts.LastTypedAt, GETUTCDATE()) < 5";
             return await connection.QuerySingleOrDefaultAsync<DateTime?>(sql, new { ChatId = chatId, UserId = userId });
+        }
+
+        public async Task<List<int>> GetChatIdsForUserAsync(int userId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            var sql = "SELECT ChatId FROM ChatMembers WHERE UserId = @UserId";
+            var result = await connection.QueryAsync<int>(sql, new { UserId = userId });
+            return result.ToList();
         }
     }
 }

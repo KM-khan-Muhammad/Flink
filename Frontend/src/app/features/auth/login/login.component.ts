@@ -16,123 +16,177 @@ interface AuthResponse {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-screen flex flex-col items-center justify-center theme-bg theme-text p-4" style="font-family: 'Inter', sans-serif;">
-      <div class="w-full max-w-[350px] flex flex-col gap-2.5">
+    <div class="auth-page">
+      <section class="auth-shell auth-shell-login">
+        <aside class="auth-visual">
+          <div class="auth-dot-grid"></div>
+          <div class="auth-avatar avatar-one"><span>KM</span></div>
+          <div class="auth-avatar avatar-two"><span>SA</span></div>
+          <div class="auth-avatar avatar-three"><span>AR</span></div>
+          <div class="auth-avatar avatar-four"><span>MH</span></div>
+          <div class="auth-mini-icon icon-video"><i class="fa-solid fa-video"></i></div>
+          <div class="auth-mini-icon icon-mic"><i class="fa-solid fa-microphone"></i></div>
+          <div class="auth-mini-icon icon-call"><i class="fa-solid fa-phone"></i></div>
+          <div class="auth-mini-icon icon-more"><i class="fa-solid fa-ellipsis"></i></div>
+          <div class="auth-chat-mark"><span></span><span></span><span></span></div>
+          <div class="auth-brand">
+            <h1>Flink</h1>
+            <strong>Connect. Chat. Share.</strong>
+            <p>Stay in touch with friends and family anytime, anywhere.</p>
+            <div class="auth-dots"><span></span><span></span><span></span></div>
+          </div>
+        </aside>
 
-        <!-- Main Card -->
-        <div class="w-full border theme-border theme-bg px-10 pt-12 pb-6 flex flex-col items-center">
+        <main class="auth-form-panel">
+          <div class="auth-form-header">
+            <h2>Welcome back</h2>
+            <p>Log in to continue your conversations.</p>
+          </div>
 
-          <!-- Logo -->
-          <h1 class="text-[3rem] theme-text mb-6" style="font-family: 'Grand Hotel', cursive; font-weight: 400;">Flink</h1>
-
-          <!-- Form -->
-          <form (ngSubmit)="onSubmit()" class="w-full flex flex-col gap-[6px]">
-
-            <!-- Email Input -->
-            <div class="relative w-full">
-              <input type="email" name="email" id="login-email"
-                class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                [(ngModel)]="credentials.email" required placeholder=" " autocomplete="email">
-              <label for="login-email"
-                class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                  peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                  peer-focus:text-[10px] peer-focus:top-[6px]
-                  peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                  text-[10px] top-[6px]">
-                Phone number, username, or email
-              </label>
+          <form (ngSubmit)="onSubmit()" class="auth-form">
+            <div class="auth-field">
+              <i class="fa-regular fa-user"></i>
+              <input type="text" name="email" id="login-email" [(ngModel)]="credentials.email" required placeholder="Phone number, username, or email" autocomplete="email">
             </div>
 
-            <!-- Password Input -->
-            <div class="relative w-full">
-              <input type="password" name="password" id="login-password"
-                class="peer w-full theme-bg-elevated border theme-border rounded-[3px] h-[38px] px-2 pt-[14px] pb-[2px] text-[12px] theme-text outline-none focus:border-[#a8a8a8] transition-colors"
-                [(ngModel)]="credentials.password" required placeholder=" " autocomplete="current-password">
-              <label for="login-password"
-                class="absolute left-[9px] theme-text-secondary transition-all duration-100 ease-linear pointer-events-none
-                  peer-placeholder-shown:text-[12px] peer-placeholder-shown:top-[11px]
-                  peer-focus:text-[10px] peer-focus:top-[6px]
-                  peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:top-[6px]
-                  text-[10px] top-[6px]">
-                Password
-              </label>
+            <div class="auth-field">
+              <i class="fa-solid fa-lock"></i>
+              <input type="password" name="password" id="login-password" [(ngModel)]="credentials.password" required placeholder="Password" autocomplete="current-password">
             </div>
 
             @if (errorMessage) {
-              <p class="text-[#ed4956] text-[13px] text-center mt-2 leading-tight">{{ errorMessage }}</p>
+              <p class="auth-message error">{{ errorMessage }}</p>
             }
 
-            <!-- Login Button -->
-            <button type="submit"
-              class="w-full bg-[#0095f6] text-white font-semibold text-[14px] h-[32px] rounded-lg mt-2 transition-colors hover:bg-[#1877f2] disabled:bg-[#0095f6]/30 disabled:cursor-default flex items-center justify-center"
-              [disabled]="loading || !credentials.email || !credentials.password">
+            @if (showEmailVerification) {
+              <div class="auth-verify-box">
+                <p>Verify this email here, then login will continue automatically.</p>
+                @if (!emailOtpSent) {
+                  <button type="button" class="auth-secondary" (click)="sendLoginEmailOtp()" [disabled]="loading || !credentials.email">
+                    Send verification OTP
+                  </button>
+                } @else {
+                  <div class="auth-inline">
+                    <div class="auth-field">
+                      <i class="fa-solid fa-key"></i>
+                      <input type="text" name="loginEmailOtp" [(ngModel)]="emailOtp" maxlength="6" inputmode="numeric" placeholder="OTP code">
+                    </div>
+                    <button type="button" class="auth-secondary compact filled" (click)="verifyLoginEmailOtp()" [disabled]="loading || !emailOtp">
+                      Verify
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <button type="submit" class="auth-primary" [disabled]="loading || !credentials.email || !credentials.password">
               @if (loading) {
-                <div class="w-[18px] h-[18px] border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div class="auth-spinner"></div>
               } @else {
-                Log in
+                <span>Log in</span>
+                <i class="fa-solid fa-arrow-right"></i>
               }
             </button>
           </form>
 
-          <!-- OR divider -->
-          <div class="flex items-center w-full gap-[18px] my-5">
-            <div class="h-[1px] theme-border flex-1"></div>
-            <span class="theme-text-secondary text-[13px] font-semibold uppercase tracking-wide">or</span>
-            <div class="h-[1px] theme-border flex-1"></div>
+          <a href="#" class="auth-forgot">Forgot password?</a>
+
+          <div class="auth-footer">
+            <span>Don't have an account?</span>
+            <a routerLink="/register">Sign up</a>
           </div>
-
-          <!-- Forgot Password -->
-          <a href="#" class="text-[12px] text-[#e0f1ff] hover:opacity-80 transition-colors">Forgot password?</a>
-        </div>
-
-        <!-- Sign up Card -->
-        <div class="w-full border theme-border theme-bg py-[25px] flex justify-center items-center gap-[5px] text-[14px]">
-          <span class="theme-text">Don't have an account?</span>
-          <a routerLink="/register" class="text-[#0095f6] font-semibold hover:opacity-80 transition-colors cursor-pointer">Sign up</a>
-        </div>
-
-        <!-- Get the app -->
-        <div class="w-full flex flex-col items-center mt-2 gap-4">
-          <span class="text-[14px] theme-text">Get the app.</span>
-          <div class="flex gap-2 justify-center">
-            <div class="h-[40px] px-4 theme-bg border theme-border rounded-[5px] flex items-center justify-center cursor-pointer hover:theme-bg-elevated transition-colors gap-2">
-              <i class="fa-brands fa-apple text-[1.2rem] theme-text"></i>
-              <span class="text-[13px] font-medium theme-text">App Store</span>
-            </div>
-            <div class="h-[40px] px-4 theme-bg border theme-border rounded-[5px] flex items-center justify-center cursor-pointer hover:theme-bg-elevated transition-colors gap-2">
-              <i class="fa-brands fa-google-play text-[1.1rem] theme-text"></i>
-              <span class="text-[13px] font-medium theme-text">Google Play</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        </main>
+      </section>
     </div>
   `
 })
 export class LoginComponent {
   credentials = { email: '', password: '' };
   errorMessage = '';
+  showEmailVerification = false;
+  emailOtpSent = false;
+  emailOtp = '';
   loading = false;
+  environment = environment;
 
   constructor(private http: HttpClient, private router: Router) {}
 
   onSubmit() {
     this.loading = true;
     this.errorMessage = '';
-    this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, this.credentials).subscribe({
+    const loginPayload = {
+      ...this.credentials,
+      email: this.credentials.email.trim()
+    };
+
+    this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, loginPayload).subscribe({
       next: (response: AuthResponse) => {
         this.loading = false;
         if (response.success && response.token) {
           localStorage.setItem('token', response.token);
           this.router.navigate(['/dashboard']);
         } else {
+          this.handleLoginFailure(response.message);
+        }
+      },
+      error: (err: { error: AuthResponse }) => {
+        this.loading = false;
+        this.handleLoginFailure(err.error?.message || 'Login failed. Please check your credentials.');
+      }
+    });
+  }
+
+  sendLoginEmailOtp() {
+    this.loading = true;
+    this.errorMessage = '';
+    this.http.post<AuthResponse>(`${environment.apiUrl}/auth/send-otp`, { target: this.credentials.email.trim() }).subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.emailOtpSent = true;
+          this.errorMessage = '';
+        } else {
           this.errorMessage = response.message;
         }
       },
       error: (err: { error: AuthResponse }) => {
         this.loading = false;
-        this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+        this.errorMessage = err.error?.message || 'Failed to send verification OTP.';
       }
     });
+  }
+
+  verifyLoginEmailOtp() {
+    this.loading = true;
+    this.errorMessage = '';
+    this.http.post<AuthResponse>(`${environment.apiUrl}/auth/verify-otp`, {
+      target: this.credentials.email.trim(),
+      otp: this.emailOtp.trim()
+    }).subscribe({
+      next: (response) => {
+        this.loading = false;
+        if (response.success) {
+          this.showEmailVerification = false;
+          this.emailOtpSent = false;
+          this.emailOtp = '';
+          this.onSubmit();
+        } else {
+          this.errorMessage = response.message;
+        }
+      },
+      error: (err: { error: AuthResponse }) => {
+        this.loading = false;
+        this.errorMessage = err.error?.message || 'Invalid verification OTP.';
+      }
+    });
+  }
+
+  private handleLoginFailure(message: string) {
+    this.errorMessage = message;
+    this.showEmailVerification = message.toLowerCase().includes('verify your email');
+    if (!this.showEmailVerification) {
+      this.emailOtpSent = false;
+      this.emailOtp = '';
+    }
   }
 }

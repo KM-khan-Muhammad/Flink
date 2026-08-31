@@ -23,5 +23,6 @@ namespace Flink.Application.Interfaces
         Task<bool> IsUserOnlineAsync(int userId);
         Task UpdateTypingAsync(int chatId, int userId);
         Task<DateTime?> GetOtherUserTypingAsync(int chatId, int userId);
+        Task<ChatDto> CreateGroupChatAsync(int userId, CreateGroupChatRequest request);
     }
 }

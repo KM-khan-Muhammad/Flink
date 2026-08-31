@@ -9,10 +9,12 @@ namespace Flink.Infrastructure.Services
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
+        private readonly ISmsService _smsService;
 
-        public ChatService(IChatRepository chatRepository)
+        public ChatService(IChatRepository chatRepository, ISmsService smsService)
         {
             _chatRepository = chatRepository;
+            _smsService = smsService;
         }
 
         public async Task<List<ChatDto>> GetUserChatsAsync(int userId)
@@ -52,18 +54,59 @@ namespace Flink.Infrastructure.Services
 
             var messageId = await _chatRepository.SendMessageAsync(request.ChatId, userId, request.Content, request.MessageType, request.ReplyToMessageId);
 
-            return new MessageDto
+            var fullMessage = await _chatRepository.GetMessageByIdAsync(messageId);
+            if (fullMessage != null)
+            {
+                _ = SendWhatsAppNotificationsAsync(userId, fullMessage);
+                return fullMessage;
+            }
+
+            var fallbackMessage = new MessageDto
             {
                 Id = messageId,
                 ChatId = request.ChatId,
                 SenderId = userId,
                 Content = request.Content,
-                MessageType = request.MessageType,
+                MessageType = request.MessageType ?? "text",
                 IsRead = false,
                 IsDeleted = false,
                 ReplyToMessageId = request.ReplyToMessageId,
                 SentAt = DateTime.UtcNow
             };
+            _ = SendWhatsAppNotificationsAsync(userId, fallbackMessage);
+            return fallbackMessage;
+        }
+
+        private async Task SendWhatsAppNotificationsAsync(int senderId, MessageDto message)
+        {
+            if (!string.Equals(message.MessageType, "text", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            try
+            {
+                var recipients = await _chatRepository.GetWhatsAppRecipientsAsync(message.ChatId, senderId);
+                if (recipients.Count == 0) return;
+
+                var senderName = string.IsNullOrWhiteSpace(message.SenderName) ? "Flink" : message.SenderName;
+                var body = $"{senderName} on Flink: {message.Content}";
+
+                foreach (var recipient in recipients)
+                {
+                    if (string.IsNullOrWhiteSpace(recipient.PhoneNumber)) continue;
+                    try
+                    {
+                        await _smsService.SendWhatsAppAsync(recipient.PhoneNumber, body);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to send WhatsApp message to user {recipient.Id}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send WhatsApp notifications for message {message.Id}: {ex.Message}");
+            }
         }
 
         public async Task MarkAsReadAsync(int chatId, int userId)
@@ -123,6 +166,16 @@ namespace Flink.Infrastructure.Services
         public async Task<DateTime?> GetOtherUserTypingAsync(int chatId, int userId)
         {
             return await _chatRepository.GetOtherUserTypingAsync(chatId, userId);
+        }
+
+        public async Task<ChatDto> CreateGroupChatAsync(int userId, CreateGroupChatRequest request)
+        {
+            var allMemberIds = new List<int> { userId };
+            allMemberIds.AddRange(request.MemberIds.Where(id => id != userId));
+            
+            var chatId = await _chatRepository.CreateGroupChatAsync(request.Name, userId, allMemberIds);
+            var chat = await _chatRepository.GetChatByIdAsync(chatId, userId);
+            return chat!;
         }
     }
 }
